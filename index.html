@@ -216,7 +216,52 @@
     flex-direction:column;
     align-items:center;
     gap:10px;
+    position:relative;
   }
+  .game-stage{
+    position:relative;
+    display:inline-block;
+  }
+  .gameover-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(5,12,30,0.82);
+    backdrop-filter:blur(2px);
+    border-radius:12px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-align:center;
+    padding:16px;
+    animation:pop .2s cubic-bezier(.2,1.4,.4,1);
+  }
+  .gameover-overlay.show{display:flex;}
+  .gameover-overlay .go-title{
+    font-size:1.5rem;
+    font-weight:800;
+    letter-spacing:1px;
+  }
+  .gameover-overlay .go-title.win{color:var(--accent2);}
+  .gameover-overlay .go-title.lose{color:#e05d6f;}
+  .gameover-overlay .go-sub{
+    color:var(--text-dim);
+    font-size:0.95rem;
+  }
+  .gameover-overlay .go-restart{
+    margin-top:4px;
+    padding:10px 22px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent2);
+    color:#20260a;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .gameover-overlay .go-restart:hover{background:#ffdd8c;}
+  .gameover-overlay .go-restart:active{transform:scale(.96);}
   canvas{
     background:#081733;
     border-radius:12px;
@@ -450,16 +495,48 @@ function openGame(key){
 }
 
 /* =================================================================
+   Gemeinsames Game-Over-Overlay
+   wrapEl: das Element mit position:relative (Klasse "game-stage"),
+   in das das Overlay eingehängt wird.
+================================================================= */
+function createGameOverOverlay(wrapEl){
+  const ov = document.createElement('div');
+  ov.className = 'gameover-overlay';
+  ov.innerHTML = `
+    <div class="go-title" id="goTitle">Game Over</div>
+    <div class="go-sub" id="goSub"></div>
+    <button class="go-restart" id="goRestartBtn">🔄 Neustart</button>
+  `;
+  wrapEl.appendChild(ov);
+  return {
+    show(title, sub, kind, onRestart){
+      ov.querySelector('#goTitle').textContent = title;
+      ov.querySelector('#goTitle').className = 'go-title' + (kind ? ' '+kind : '');
+      ov.querySelector('#goSub').textContent = sub || '';
+      ov.classList.add('show');
+      const btn = ov.querySelector('#goRestartBtn');
+      const handler = ()=>{ ov.classList.remove('show'); onRestart(); };
+      btn.onclick = handler;
+    },
+    hide(){ ov.classList.remove('show'); },
+    el: ov
+  };
+}
+
+/* =================================================================
    SNAKE
 ================================================================= */
 function initSnake(area){
   area.innerHTML = `
     <div class="score">Punkte: <span id="snakeScore">0</span></div>
-    <canvas id="snakeCanvas" width="320" height="320"></canvas>
+    <div class="game-stage" id="snakeStage">
+      <canvas id="snakeCanvas" width="320" height="320"></canvas>
+    </div>
     <div class="hint">Pfeiltasten oder Wischen zum Steuern — Wände sind tödlich!</div>
   `;
   const canvas = document.getElementById('snakeCanvas');
   const ctx = canvas.getContext('2d');
+  const goOverlay = createGameOverOverlay(document.getElementById('snakeStage'));
   const grid = 16;
   const cells = canvas.width/grid;
   let snake, dir, nextDir, food, score, alive, loopId;
@@ -490,12 +567,7 @@ function initSnake(area){
       ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
     });
     if(!alive){
-      ctx.fillStyle = 'rgba(5,12,30,0.7)';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = '#fff';
-      ctx.font = '20px sans-serif';
-      ctx.textAlign='center';
-      ctx.fillText('Game Over — Klick zum Neustart', canvas.width/2, canvas.height/2);
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht.', 'lose', ()=>{ reset(); draw(); });
     }
   }
   function step(){
@@ -534,12 +606,9 @@ function initSnake(area){
     else nd = dy>0 ? {x:0,y:1} : {x:0,y:-1};
     if(!(nd.x===-dir.x && nd.y===-dir.y)) nextDir = nd;
   }
-  function clickHandler(){ if(!alive) reset(); }
-
   document.addEventListener('keydown', keyHandler);
   canvas.addEventListener('touchstart', touchStartH);
   canvas.addEventListener('touchend', touchEndH);
-  canvas.addEventListener('click', clickHandler);
 
   reset();
   draw();
@@ -550,7 +619,6 @@ function initSnake(area){
     document.removeEventListener('keydown', keyHandler);
     canvas.removeEventListener('touchstart', touchStartH);
     canvas.removeEventListener('touchend', touchEndH);
-    canvas.removeEventListener('click', clickHandler);
   };
 }
 
@@ -567,11 +635,14 @@ function initFight(area){
         <div class="bar-outer"><div class="bar-inner foe" id="foeBar" style="width:100%"></div></div>
       </div>
     </div>
-    <canvas id="fightCanvas" width="360" height="200"></canvas>
+    <div class="game-stage" id="fightStage">
+      <canvas id="fightCanvas" width="360" height="200"></canvas>
+    </div>
     <div class="hint" id="fightMsg">← → Laufen · ↑ / Leertaste Springen · X Schlagen</div>
   `;
   const canvas = document.getElementById('fightCanvas');
   const ctx = canvas.getContext('2d');
+  const goOverlay = createGameOverOverlay(document.getElementById('fightStage'));
   const groundY = 160;
   const W = canvas.width;
   let over = false, rafId;
@@ -610,7 +681,24 @@ function initFight(area){
   }
   function endFight(){
     over = true;
-    msg.textContent = you.hp<=0 ? 'Du hast verloren! Klick "Menü", um es erneut zu versuchen.' : 'Du hast gewonnen! 🎉';
+    const won = foe.hp<=0 && you.hp>0;
+    goOverlay.show(
+      won ? 'Sieg!' : 'Niederlage',
+      won ? 'Du hast den Gegner besiegt! 🎉' : 'Der Gegner war stärker — versuch es nochmal!',
+      won ? 'win' : 'lose',
+      restartFight
+    );
+  }
+  function restartFight(){
+    you.hp = 100; foe.hp = 100; you.x = 60; foe.x = 280; you.y = groundY; foe.y = groundY;
+    you.vy = 0; foe.vy = 0; you.onGround = true; foe.onGround = true;
+    over = false;
+    updateBarsRaw();
+    rafId = requestAnimationFrame(update);
+  }
+  function updateBarsRaw(){
+    document.getElementById('youBar').style.width = you.hp+'%';
+    document.getElementById('foeBar').style.width = foe.hp+'%';
   }
 
   function drawStick(p, color){
@@ -684,16 +772,6 @@ function initFight(area){
     else { draw(); }
   }
 
-  function clickRestart(e){
-    if(over){
-      you.hp = 100; foe.hp = 100; you.x = 60; foe.x = 280; over = false;
-      updateBars();
-      msg.textContent = '← → Laufen · ↑ / Leertaste Springen · X Schlagen';
-      rafId = requestAnimationFrame(update);
-    }
-  }
-  canvas.addEventListener('click', clickRestart);
-
   draw();
   rafId = requestAnimationFrame(update);
 
@@ -701,7 +779,6 @@ function initFight(area){
     cancelAnimationFrame(rafId);
     document.removeEventListener('keydown', keyDown);
     document.removeEventListener('keyup', keyUp);
-    canvas.removeEventListener('click', clickRestart);
   };
 }
 
@@ -711,12 +788,15 @@ function initFight(area){
 function initBlast(area){
   area.innerHTML = `
     <div class="score">Punkte: <span id="blastScore">0</span> &nbsp;|&nbsp; Level: <span id="blastLevel">1</span></div>
-    <canvas id="blastCanvas" width="240" height="440"></canvas>
+    <div class="game-stage" id="blastStage">
+      <canvas id="blastCanvas" width="240" height="440"></canvas>
+    </div>
     <div class="hint">← → bewegen · ↑ drehen · ↓ schneller fallen · Leertaste: Hard-Drop</div>
   `;
   const cols = 8, rows = 16, cell = 30;
   const canvas = document.getElementById('blastCanvas');
   const ctx = canvas.getContext('2d');
+  const goOverlay = createGameOverOverlay(document.getElementById('blastStage'));
   canvas.width = cols*cell;
   canvas.height = rows*cell;
 
@@ -743,6 +823,7 @@ function initBlast(area){
     board = Array.from({length:rows},()=>Array(cols).fill(null));
     score = 0; level = 1; dropInterval = 800; over = false;
     cur = newPiece();
+    goOverlay.hide();
     document.getElementById('blastScore').textContent = score;
     document.getElementById('blastLevel').textContent = level;
   }
@@ -783,7 +864,10 @@ function initBlast(area){
     merge();
     clearLines();
     cur = newPiece();
-    if(collides(cur.shape, cur.x, cur.y)){ over = true; }
+    if(collides(cur.shape, cur.x, cur.y)){
+      over = true;
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte in Level '+level+' erreicht.', 'lose', ()=>{ reset(); });
+    }
   }
   function rotate(){
     const s = cur.shape;
@@ -810,16 +894,6 @@ function initBlast(area){
     ctx.fillRect(0,0,canvas.width,canvas.height);
     for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) if(board[r][c]) drawCell(c,r,colors[board[r][c]]);
     cur.shape.forEach((row,r)=>row.forEach((v,c)=>{ if(v) drawCell(cur.x+c, cur.y+r, colors[cur.key]); }));
-    if(over){
-      ctx.fillStyle = 'rgba(5,12,30,0.75)';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = '#fff';
-      ctx.font = '18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Game Over', canvas.width/2, canvas.height/2 - 10);
-      ctx.font = '14px sans-serif';
-      ctx.fillText('Klick zum Neustart', canvas.width/2, canvas.height/2 + 14);
-    }
   }
   function loop(time){
     if(!lastTime) lastTime = time;
@@ -841,10 +915,7 @@ function initBlast(area){
     else if(e.key==='ArrowDown'){ softDrop(); e.preventDefault(); }
     else if(e.key===' '){ hardDrop(); e.preventDefault(); }
   }
-  function clickHandler(){ if(over) reset(); }
-
   document.addEventListener('keydown', keyHandler);
-  canvas.addEventListener('click', clickHandler);
 
   reset();
   rafId = requestAnimationFrame(loop);
@@ -852,7 +923,6 @@ function initBlast(area){
   return function stop(){
     cancelAnimationFrame(rafId);
     document.removeEventListener('keydown', keyHandler);
-    canvas.removeEventListener('click', clickHandler);
   };
 }
 
@@ -862,18 +932,23 @@ function initBlast(area){
 function initMerge(area){
   area.innerHTML = `
     <div class="score">Punkte: <span id="mergeScore">0</span></div>
-    <div id="mergeGrid"></div>
+    <div class="game-stage" id="mergeStage">
+      <div id="mergeGrid"></div>
+    </div>
     <div class="hint">Pfeiltasten (oder Wischen): gleiche Früchte verschmelzen zur nächsten!</div>
   `;
   const size = 4;
   const gridEl = document.getElementById('mergeGrid');
+  const goOverlay = createGameOverOverlay(document.getElementById('mergeStage'));
   gridEl.style.gridTemplateColumns = `repeat(${size}, 64px)`;
   const fruits = ['🍒','🍓','🍊','🍎','🍍','🍉','🍈','🥥'];
-  let board, score;
+  let board, score, over;
 
   function reset(){
     board = Array.from({length:size},()=>Array(size).fill(0));
     score = 0;
+    over = false;
+    goOverlay.hide();
     addRandom(); addRandom();
     render();
   }
@@ -910,6 +985,7 @@ function initMerge(area){
     return merged;
   }
   function move(dir){
+    if(over) return;
     let moved = false;
     const before = JSON.stringify(board);
     if(dir==='left'){
@@ -930,7 +1006,26 @@ function initMerge(area){
       }
     }
     moved = JSON.stringify(board) !== before;
-    if(moved){ addRandom(); render(); }
+    if(moved){ addRandom(); render(); checkGameOver(); }
+  }
+  function hasMovesLeft(){
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(!board[r][c]) return true;
+        if(c<size-1 && board[r][c]===board[r][c+1]) return true;
+        if(r<size-1 && board[r][c]===board[r+1][c]) return true;
+      }
+    }
+    return false;
+  }
+  function checkGameOver(){
+    if(!hasMovesLeft() && !over){
+      over = true;
+      let best = 0;
+      board.forEach(row=>row.forEach(v=>{ if(v>best) best=v; }));
+      const bestFruit = fruits[Math.min(best-1, fruits.length-1)] || '';
+      goOverlay.show('Game Over', `Keine Züge mehr möglich — ${score} Punkte, größte Frucht ${bestFruit}.`, 'lose', reset);
+    }
   }
   function keyHandler(e){
     const map = {ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
