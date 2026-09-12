@@ -527,6 +527,142 @@
     user-select:none;
   }
 
+  /* ---------- Touch controls (mobile) ---------- */
+  .touch-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    gap:14px;
+    margin-top:4px;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .touch-pad{ display:flex; gap:10px; }
+  .touch-btn{
+    width:56px;height:56px;
+    border-radius:12px;
+    border:1px solid rgba(0,240,255,0.35);
+    background:var(--panel-2);
+    color:var(--cyan);
+    font-size:1.4rem;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;
+    cursor:pointer;
+  }
+  .touch-btn:active{ background:#241448; box-shadow:0 0 14px rgba(0,240,255,0.4); transform:scale(.94); }
+  .touch-btn.wide{ width:auto; padding:0 18px; }
+  .touch-btn.action{ border-color:rgba(255,43,214,0.45); color:var(--magenta); }
+
+  /* ---------- War of Stickmen ---------- */
+  .war-hud{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    gap:10px;
+    flex-wrap:wrap;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.8rem;
+  }
+  .war-hud .gold{ color:var(--amber); text-shadow:0 0 8px rgba(255,176,32,0.6); }
+  .war-hud .lvl{ color:var(--text); }
+  .war-castles{
+    display:flex;
+    justify-content:space-between;
+    width:100%;
+    gap:10px;
+    font-size:0.75rem;
+  }
+  .war-castles .bar-outer{ height:12px; }
+  .war-castles .side{ flex:1; }
+  .war-castles .side.enemy .bar-inner{ background:linear-gradient(90deg,var(--danger),#ff7a93); }
+  .war-castles .side.player .bar-inner{ background:linear-gradient(90deg,var(--cyan),#6fe9ff); }
+  .war-shop{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    width:100%;
+  }
+  .war-unit-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    padding:8px 4px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    cursor:pointer;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:0.75rem;
+    touch-action:manipulation;
+  }
+  .war-unit-btn .u-icon{ font-size:1.3rem; }
+  .war-unit-btn .u-cost{ color:var(--amber); font-size:0.7rem; }
+  .war-unit-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .war-unit-btn:not(:disabled):active{ transform:scale(.95); background:#241448; }
+  .war-msg{
+    color:var(--text-dim);
+    font-size:0.8rem;
+    text-align:center;
+    min-height:1.1em;
+  }
+
+  /* ---------- Fruit Merge Legende ---------- */
+  .fruit-legend-wrap{
+    max-width:360px;
+    margin:0 auto;
+  }
+  .fruit-legend-title{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:0.8rem;
+    letter-spacing:0.5px;
+    margin-bottom:4px;
+  }
+  .fruit-legend{
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:2px 0;
+    padding:8px 10px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .fruit-legend .step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1px;
+    width:44px;
+    font-size:1.1rem;
+  }
+  .fruit-legend .step .f-name{
+    font-size:0.55rem;
+    color:var(--text-dim);
+    text-align:center;
+    line-height:1.1;
+    white-space:pre-line;
+  }
+  .fruit-legend .arrow{
+    color:var(--text-dim);
+    font-size:0.8rem;
+    align-self:center;
+    margin:0 1px;
+  }
+  .fruit-legend .step.reached{
+    filter:drop-shadow(0 0 6px rgba(0,240,255,0.7));
+  }
+  .fruit-legend .step.reached .f-name{ color:var(--cyan); }
+  .fruit-legend .step.locked{
+    opacity:0.35;
+  }
+
   @media (max-width: 760px){
     nav .links{ display:none; }
     .cards{ grid-template-columns:1fr; max-width:480px; }
@@ -575,7 +711,7 @@
       <article class="card" id="gameOpenBtn">
         <div class="icon">🎮</div>
         <h3>Arcade</h3>
-        <p>Snake, Stickman Fight, Tetris-Block-Blast und Fruit Merge — wähl dein Spiel im Menü.</p>
+        <p>Snake, Stickman Fight, Tetris und Fruit Merge — wähl dein Spiel im Menü.</p>
         <span class="card-cta">Spiele anzeigen →</span>
       </article>
       <article class="card">
@@ -643,8 +779,9 @@
     <div class="game-list">
       <button data-game="snake"><span class="g-icon">🐍</span> Snake</button>
       <button data-game="fight"><span class="g-icon">🥋</span> Stickman Fight</button>
-      <button data-game="blast"><span class="g-icon">🧱</span> Block Blast</button>
+      <button data-game="blast"><span class="g-icon">🧱</span> Tetris</button>
       <button data-game="merge"><span class="g-icon">🍉</span> Fruit Merge</button>
+      <button data-game="war"><span class="g-icon">⚔️</span> War of Stickmen</button>
     </div>
   </div>
 </div>
@@ -664,6 +801,117 @@
 /* ---------------- Modal Helpers ---------------- */
 function openModal(id){document.getElementById(id).classList.add('active');}
 function closeModal(id){document.getElementById(id).classList.remove('active');}
+
+/* ---------------- Highscore Helper (localStorage) ---------------- */
+function getHighscore(key){
+  try{ return parseInt(localStorage.getItem('recharger_hs_'+key) || '0', 10) || 0; }
+  catch(e){ return 0; }
+}
+function setHighscore(key, val){
+  try{ localStorage.setItem('recharger_hs_'+key, String(val)); }catch(e){}
+}
+function maybeUpdateHighscore(key, val){
+  const hs = getHighscore(key);
+  if(val > hs){ setHighscore(key, val); return val; }
+  return hs;
+}
+
+/* ---------------- Landschafts-Generator (für Fight & War) ----------------
+   Zeichnet einmalig eine Cyberpunk-Landschaft (Himmel, Berge, Hügel, Boden)
+   auf einen Offscreen-Canvas, der dann pro Frame nur noch kopiert wird. */
+function seededRandom(seed){
+  let s = seed;
+  return function(){ s = (s*9301+49297) % 233280; return s/233280; };
+}
+function drawRidge(ctx, W, baseY, peakMinY, segments, seed, fill){
+  const rnd = seededRandom(seed);
+  ctx.beginPath();
+  ctx.moveTo(0, baseY);
+  const step = W/segments;
+  for(let i=0;i<=segments;i++){
+    const x = i*step;
+    const y = peakMinY + rnd()*(baseY-peakMinY)*0.6;
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W, baseY);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+function createLandscape(W, H, groundY){
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const c = off.getContext('2d');
+
+  // Himmel
+  const sky = c.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#180a35');
+  sky.addColorStop(0.55,'#241049');
+  sky.addColorStop(1,'#33195c');
+  c.fillStyle = sky;
+  c.fillRect(0,0,W,groundY);
+
+  // Leuchtender Mond
+  const moonX = W*0.8, moonY = groundY*0.22;
+  const glow = c.createRadialGradient(moonX,moonY,4,moonX,moonY,70);
+  glow.addColorStop(0,'rgba(0,240,255,0.85)');
+  glow.addColorStop(1,'rgba(0,240,255,0)');
+  c.fillStyle = glow;
+  c.beginPath(); c.arc(moonX,moonY,70,0,Math.PI*2); c.fill();
+  c.fillStyle = '#eafcff';
+  c.beginPath(); c.arc(moonX,moonY,13,0,Math.PI*2); c.fill();
+
+  // Sterne
+  const starRnd = seededRandom(99);
+  c.fillStyle = 'rgba(255,255,255,0.5)';
+  for(let i=0;i<40;i++){
+    c.fillRect(starRnd()*W, starRnd()*groundY*0.7, 1.5, 1.5);
+  }
+
+  // Ferne Bergkette (Silhouette, Skyline-artig)
+  drawRidge(c, W, groundY, groundY*0.42, 7, 1234, '#20103f');
+  // Neon-Skyline: einige rechteckige "Türme" mit Fensterlichtern
+  const towerRnd = seededRandom(4242);
+  for(let i=0;i<6;i++){
+    const tw = 14+towerRnd()*22;
+    const th = 30+towerRnd()*(groundY*0.4);
+    const tx = towerRnd()*W;
+    c.fillStyle = '#180d33';
+    c.fillRect(tx, groundY-th, tw, th);
+    c.fillStyle = towerRnd()>0.5 ? 'rgba(0,240,255,0.5)' : 'rgba(255,43,214,0.4)';
+    for(let wy=groundY-th+6; wy<groundY-6; wy+=10){
+      for(let wx=tx+3; wx<tx+tw-3; wx+=7){
+        if(towerRnd()>0.4) c.fillRect(wx,wy,3,4);
+      }
+    }
+  }
+
+  // Nahe Hügelkette mit Neon-Kontur
+  drawRidge(c, W, groundY, groundY*0.68, 6, 777, '#2a1450');
+  c.strokeStyle = 'rgba(0,240,255,0.25)';
+  c.lineWidth = 1.5;
+
+  // Boden
+  const groundGrad = c.createLinearGradient(0,groundY,0,H);
+  groundGrad.addColorStop(0,'#150826');
+  groundGrad.addColorStop(1,'#05020c');
+  c.fillStyle = groundGrad;
+  c.fillRect(0,groundY,W,H-groundY);
+  c.strokeStyle = 'rgba(0,240,255,0.4)';
+  c.lineWidth = 2;
+  c.beginPath(); c.moveTo(0,groundY); c.lineTo(W,groundY); c.stroke();
+
+  // Gras-/Steinbüschel
+  const grassRnd = seededRandom(555);
+  for(let i=0;i<Math.floor(W/16);i++){
+    const gx = grassRnd()*W;
+    c.strokeStyle = 'rgba(0,240,255,0.3)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(gx,groundY); c.lineTo(gx-3,groundY-7); c.stroke();
+    c.beginPath(); c.moveTo(gx,groundY); c.lineTo(gx+3,groundY-7); c.stroke();
+  }
+  return off;
+}
 
 document.getElementById('calcOpenBtn').onclick = ()=>openModal('calcModal');
 document.getElementById('gameOpenBtn').onclick = ()=>openModal('gameMenuModal');
@@ -735,8 +983,9 @@ function stopCurrentGame(){
 const titles = {
   snake:'Snake',
   fight:'Stickman Fight',
-  blast:'Block Blast',
-  merge:'Fruit Merge'
+  blast:'Tetris',
+  merge:'Fruit Merge',
+  war:'War of Stickmen'
 };
 
 function openGame(key){
@@ -748,6 +997,7 @@ function openGame(key){
   if(key==='fight') currentStop = initFight(area);
   if(key==='blast') currentStop = initBlast(area);
   if(key==='merge') currentStop = initMerge(area);
+  if(key==='war') currentStop = initWar(area);
 }
 
 /* =================================================================
@@ -784,7 +1034,7 @@ function createGameOverOverlay(wrapEl){
 ================================================================= */
 function initSnake(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="snakeScore">0</span></div>
+    <div class="score">Punkte: <span id="snakeScore">0</span> &nbsp;|&nbsp; 🏆 Highscore: <span id="snakeHigh">0</span></div>
     <div class="game-stage" id="snakeStage">
       <canvas id="snakeCanvas" width="320" height="320"></canvas>
     </div>
@@ -796,6 +1046,8 @@ function initSnake(area){
   const grid = 16;
   const cells = canvas.width/grid;
   let snake, dir, nextDir, food, score, alive, loopId;
+
+  document.getElementById('snakeHigh').textContent = getHighscore('snake');
 
   function reset(){
     snake = [{x:8,y:8},{x:7,y:8},{x:6,y:8}];
@@ -823,7 +1075,9 @@ function initSnake(area){
       ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
     });
     if(!alive){
-      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht.', 'lose', ()=>{ reset(); draw(); });
+      const hs = maybeUpdateHighscore('snake', score);
+      document.getElementById('snakeHigh').textContent = hs;
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); draw(); });
     }
   }
   function step(){
@@ -891,18 +1145,32 @@ function initFight(area){
         <div class="bar-outer"><div class="bar-inner foe" id="foeBar" style="width:100%"></div></div>
       </div>
     </div>
+    <div class="score">🏆 Beste Serie: <span id="fightHigh">0</span> &nbsp;|&nbsp; Aktuelle Serie: <span id="fightStreak">0</span></div>
     <div class="game-stage" id="fightStage">
       <canvas id="fightCanvas" width="360" height="200"></canvas>
     </div>
     <div class="hint" id="fightMsg">← → Laufen · ↑ / Leertaste Springen · X Schlagen</div>
+    <div class="touch-controls">
+      <div class="touch-pad">
+        <button class="touch-btn" id="ftLeft">◀</button>
+        <button class="touch-btn" id="ftRight">▶</button>
+      </div>
+      <div class="touch-pad">
+        <button class="touch-btn" id="ftJump">⤒</button>
+        <button class="touch-btn action" id="ftPunch">👊</button>
+      </div>
+    </div>
   `;
   const canvas = document.getElementById('fightCanvas');
   const ctx = canvas.getContext('2d');
   const goOverlay = createGameOverOverlay(document.getElementById('fightStage'));
   const groundY = 160;
   const W = canvas.width;
-  let over = false, rafId;
+  const landscape = createLandscape(W, canvas.height, groundY);
+  let over = false, rafId, streak = 0;
   const msg = document.getElementById('fightMsg');
+
+  document.getElementById('fightHigh').textContent = getHighscore('fight');
 
   const you = { x:60, y:groundY, vy:0, onGround:true, facing:1, hp:100, punchTimer:0, hitCooldown:0 };
   const foe = { x:280, y:groundY, vy:0, onGround:true, facing:-1, hp:100, punchTimer:0, hitCooldown:0, aiTimer:0 };
@@ -916,6 +1184,32 @@ function initFight(area){
   function keyUp(e){ keysDown[e.key] = false; }
   document.addEventListener('keydown', keyDown);
   document.addEventListener('keyup', keyUp);
+
+  /* Touch-Steuerung */
+  function bindHold(id, onDown, onUp){
+    const el = document.getElementById(id);
+    const start = e=>{ e.preventDefault(); onDown(); };
+    const end = e=>{ e.preventDefault(); if(onUp) onUp(); };
+    el.addEventListener('touchstart', start, {passive:false});
+    el.addEventListener('touchend', end, {passive:false});
+    el.addEventListener('touchcancel', end, {passive:false});
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', end);
+    return ()=>{
+      el.removeEventListener('touchstart', start);
+      el.removeEventListener('touchend', end);
+      el.removeEventListener('touchcancel', end);
+      el.removeEventListener('mousedown', start);
+      el.removeEventListener('mouseup', end);
+      el.removeEventListener('mouseleave', end);
+    };
+  }
+  const unbindFns = [];
+  unbindFns.push(bindHold('ftLeft', ()=>keysDown['ArrowLeft']=true, ()=>keysDown['ArrowLeft']=false));
+  unbindFns.push(bindHold('ftRight', ()=>keysDown['ArrowRight']=true, ()=>keysDown['ArrowRight']=false));
+  unbindFns.push(bindHold('ftJump', ()=>keysDown['ArrowUp']=true, ()=>keysDown['ArrowUp']=false));
+  unbindFns.push(bindHold('ftPunch', ()=>{ if(!over) punch(you, foe); }));
 
   function punch(attacker, defender){
     if(attacker.punchTimer>0) return;
@@ -938,9 +1232,18 @@ function initFight(area){
   function endFight(){
     over = true;
     const won = foe.hp<=0 && you.hp>0;
+    if(won){
+      streak++;
+      const hs = maybeUpdateHighscore('fight', streak);
+      document.getElementById('fightHigh').textContent = hs;
+      document.getElementById('fightStreak').textContent = streak;
+    } else {
+      streak = 0;
+      document.getElementById('fightStreak').textContent = streak;
+    }
     goOverlay.show(
       won ? 'Sieg!' : 'Niederlage',
-      won ? 'Du hast den Gegner besiegt! 🎉' : 'Der Gegner war stärker — versuch es nochmal!',
+      won ? `Du hast den Gegner besiegt! 🎉 (Serie: ${streak})` : 'Der Gegner war stärker — deine Serie wurde zurückgesetzt.',
       won ? 'win' : 'lose',
       restartFight
     );
@@ -981,10 +1284,7 @@ function initFight(area){
   }
 
   function draw(){
-    ctx.fillStyle = '#081733';
-    ctx.fillRect(0,0,W,canvas.height);
-    ctx.strokeStyle = 'rgba(94,200,255,0.3)';
-    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+    ctx.drawImage(landscape, 0, 0);
     drawStick(you, '#5ec8ff');
     drawStick(foe, '#e05d6f');
     if(over){
@@ -1035,19 +1335,31 @@ function initFight(area){
     cancelAnimationFrame(rafId);
     document.removeEventListener('keydown', keyDown);
     document.removeEventListener('keyup', keyUp);
+    unbindFns.forEach(fn=>fn());
   };
 }
 
 /* =================================================================
-   BLOCK BLAST (Tetris)
+   TETRIS
 ================================================================= */
 function initBlast(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="blastScore">0</span> &nbsp;|&nbsp; Level: <span id="blastLevel">1</span></div>
+    <div class="score">Punkte: <span id="blastScore">0</span> &nbsp;|&nbsp; Level: <span id="blastLevel">1</span> &nbsp;|&nbsp; 🏆 <span id="blastHigh">0</span></div>
     <div class="game-stage" id="blastStage">
       <canvas id="blastCanvas" width="240" height="440"></canvas>
     </div>
     <div class="hint">← → bewegen · ↑ drehen · ↓ schneller fallen · Leertaste: Hard-Drop</div>
+    <div class="touch-controls">
+      <div class="touch-pad">
+        <button class="touch-btn" id="tLeft">◀</button>
+        <button class="touch-btn" id="tRight">▶</button>
+        <button class="touch-btn" id="tDown">▼</button>
+      </div>
+      <div class="touch-pad">
+        <button class="touch-btn" id="tRotate">⟳</button>
+        <button class="touch-btn action" id="tDrop">⇩</button>
+      </div>
+    </div>
   `;
   const cols = 8, rows = 16, cell = 30;
   const canvas = document.getElementById('blastCanvas');
@@ -1069,6 +1381,8 @@ function initBlast(area){
   const keys = Object.keys(shapes);
 
   let board, cur, score, level, dropInterval, dropTimer, over, rafId, lastTime;
+
+  document.getElementById('blastHigh').textContent = getHighscore('blast');
 
   function newPiece(){
     const k = keys[Math.floor(Math.random()*keys.length)];
@@ -1122,7 +1436,9 @@ function initBlast(area){
     cur = newPiece();
     if(collides(cur.shape, cur.x, cur.y)){
       over = true;
-      goOverlay.show('Game Over', 'Du hast '+score+' Punkte in Level '+level+' erreicht.', 'lose', ()=>{ reset(); });
+      const hs = maybeUpdateHighscore('blast', score);
+      document.getElementById('blastHigh').textContent = hs;
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte in Level '+level+' erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); });
     }
   }
   function rotate(){
@@ -1173,12 +1489,28 @@ function initBlast(area){
   }
   document.addEventListener('keydown', keyHandler);
 
+  function tapBtn(id, fn){
+    const el = document.getElementById(id);
+    const handler = e=>{ e.preventDefault(); if(!over) fn(); };
+    el.addEventListener('touchstart', handler, {passive:false});
+    el.addEventListener('click', handler);
+    return ()=>{ el.removeEventListener('touchstart', handler); el.removeEventListener('click', handler); };
+  }
+  const unbindTouch = [
+    tapBtn('tLeft', ()=>move(-1)),
+    tapBtn('tRight', ()=>move(1)),
+    tapBtn('tDown', softDrop),
+    tapBtn('tRotate', rotate),
+    tapBtn('tDrop', hardDrop)
+  ];
+
   reset();
   rafId = requestAnimationFrame(loop);
 
   return function stop(){
     cancelAnimationFrame(rafId);
     document.removeEventListener('keydown', keyHandler);
+    unbindTouch.forEach(fn=>fn());
   };
 }
 
@@ -1187,7 +1519,11 @@ function initBlast(area){
 ================================================================= */
 function initMerge(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="mergeScore">0</span></div>
+    <div class="score">Punkte: <span id="mergeScore">0</span> &nbsp;|&nbsp; 🏆 Highscore: <span id="mergeHigh">0</span></div>
+    <div class="fruit-legend-wrap">
+      <div class="fruit-legend-title">Alle Früchte in der Merge-Kette</div>
+      <div class="fruit-legend" id="fruitLegend"></div>
+    </div>
     <div class="game-stage" id="mergeStage">
       <div id="mergeGrid"></div>
     </div>
@@ -1197,14 +1533,40 @@ function initMerge(area){
   const gridEl = document.getElementById('mergeGrid');
   const goOverlay = createGameOverOverlay(document.getElementById('mergeStage'));
   gridEl.style.gridTemplateColumns = `repeat(${size}, 64px)`;
-  const fruits = ['🍒','🍓','🍊','🍎','🍍','🍉','🍈','🥥'];
-  let board, score, over;
+  // Fortsetzung der Kette über die Kokosnuss hinaus:
+  const fruits = [
+    {e:'🍒', n:'Kirsche'},
+    {e:'🍓', n:'Erdbeere'},
+    {e:'🍊', n:'Orange'},
+    {e:'🍎', n:'Apfel'},
+    {e:'🍍', n:'Ananas'},
+    {e:'🍉', n:'Wasser-\nmelone'},
+    {e:'🍈', n:'Honig-\nmelone'},
+    {e:'🥥', n:'Kokosnuss'},
+    {e:'🥭', n:'Mango'},
+    {e:'🎃', n:'Kürbis'},
+    {e:'🌟', n:'Superfrucht'}
+  ];
+  let board, score, over, highestReached;
+
+  document.getElementById('mergeHigh').textContent = getHighscore('merge');
+
+  function renderLegend(){
+    const el = document.getElementById('fruitLegend');
+    el.innerHTML = fruits.map((f,i)=>{
+      const reached = i <= highestReached;
+      const step = `<span class="step ${reached?'reached':'locked'}"><span>${f.e}</span><span class="f-name">${f.n}</span></span>`;
+      return step + (i<fruits.length-1 ? '<span class="arrow">→</span>' : '');
+    }).join('');
+  }
 
   function reset(){
     board = Array.from({length:size},()=>Array(size).fill(0));
     score = 0;
     over = false;
+    highestReached = 0;
     goOverlay.hide();
+    renderLegend();
     addRandom(); addRandom();
     render();
   }
@@ -1225,7 +1587,11 @@ function initMerge(area){
         cell.style.height='64px';
         cell.style.fontSize='2rem';
         cell.style.background = '#0f2a5c';
-        if(board[r][c]) cell.textContent = fruits[Math.min(board[r][c]-1, fruits.length-1)];
+        if(board[r][c]){
+          const idx = Math.min(board[r][c]-1, fruits.length-1);
+          cell.textContent = fruits[idx].e;
+          if(idx > highestReached){ highestReached = idx; renderLegend(); }
+        }
         gridEl.appendChild(cell);
       }
     }
@@ -1279,8 +1645,11 @@ function initMerge(area){
       over = true;
       let best = 0;
       board.forEach(row=>row.forEach(v=>{ if(v>best) best=v; }));
-      const bestFruit = fruits[Math.min(best-1, fruits.length-1)] || '';
-      goOverlay.show('Game Over', `Keine Züge mehr möglich — ${score} Punkte, größte Frucht ${bestFruit}.`, 'lose', reset);
+      const bf = fruits[Math.min(best-1, fruits.length-1)];
+      const bestFruit = bf ? bf.e + ' ' + bf.n.replace('\n','') : '';
+      const hs = maybeUpdateHighscore('merge', score);
+      document.getElementById('mergeHigh').textContent = hs;
+      goOverlay.show('Game Over', `Keine Züge mehr möglich — ${score} Punkte, größte Frucht ${bestFruit}. (Highscore: ${hs})`, 'lose', reset);
     }
   }
   function keyHandler(e){
@@ -1307,6 +1676,501 @@ function initMerge(area){
     document.removeEventListener('keydown', keyHandler);
     gridEl.removeEventListener('touchstart', touchStartH);
     gridEl.removeEventListener('touchend', touchEndH);
+  };
+}
+
+/* =================================================================
+   WAR OF STICKMEN — 2D Strategie mit 10 Leveln
+================================================================= */
+function initWar(area){
+  const CASTLE_HP = [1000,1500,2000,2500,3000,3500,4000,4500,5000,5000];
+
+  const UNIT_DEFS = {
+    miner:     { name:'Minenarbeiter', icon:'⛏️', cost:50,  hp:50,  dmg:0,  speed:38, range:0,  atkTime:0,   role:'miner' },
+    sword:     { name:'Schwertkämpfer', icon:'🗡️', cost:75,  hp:100, dmg:20, speed:34, range:16, atkTime:0.7, role:'melee' },
+    archer:    { name:'Bogenschütze', icon:'🏹', cost:100, hp:75,  dmg:35, speed:34, range:130, atkTime:1.1, role:'ranged' },
+    berserker: { name:'Berserker', icon:'🔨', cost:125, hp:200, dmg:45, speed:30, range:20, atkTime:0.9, role:'melee', big:true },
+    mage:      { name:'Magier', icon:'🔥', cost:150, hp:100, dmg:55, speed:32, range:150, atkTime:1.4, role:'ranged' },
+    ninja:     { name:'Ninja', icon:'🥷', cost:200, hp:150, dmg:60, speed:46, range:16, atkTime:0.6, role:'stealth' }
+  };
+  const unitKeys = Object.keys(UNIT_DEFS);
+  const enemyPool = ['sword','sword','archer','berserker','mage','ninja'];
+
+  area.innerHTML = `
+    <div class="war-hud">
+      <span class="lvl">LEVEL <span id="warLevel">1</span> / 10</span>
+      <span class="gold">💰 <span id="warGold">200</span></span>
+      <span class="lvl">🏆 Bestes Level: <span id="warHigh">1</span></span>
+    </div>
+    <div class="war-castles">
+      <div class="side player">
+        <div>Deine Burg</div>
+        <div class="bar-outer"><div class="bar-inner you" id="warPlayerBar" style="width:100%"></div></div>
+      </div>
+      <div class="side enemy">
+        <div>Gegner-Burg</div>
+        <div class="bar-outer"><div class="bar-inner foe" id="warEnemyBar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="game-stage" id="warStage">
+      <canvas id="warCanvas" width="640" height="230"></canvas>
+    </div>
+    <div class="war-msg" id="warMsg">Baue deine Armee auf und zerstöre die gegnerische Burg!</div>
+    <div class="war-shop" id="warShop"></div>
+  `;
+
+  const canvas = document.getElementById('warCanvas');
+  const ctx = canvas.getContext('2d');
+  const goOverlay = createGameOverOverlay(document.getElementById('warStage'));
+  const W = canvas.width, H = canvas.height;
+  const groundY = H - 30;
+  const playerCastleX = 34, enemyCastleX = W - 34;
+  const mineX = 100;
+  const landscape = createLandscape(W, H, groundY);
+  const MAX_UNITS_PER_SIDE = 14;
+
+  document.getElementById('warHigh').textContent = getHighscore('war') || 1;
+
+  let level, gold, playerCastleHP, playerCastleMax, enemyCastleHP, enemyCastleMax;
+  let units, over, won, rafId, lastTime, enemySpawnTimer;
+
+  function buildShop(){
+    const shop = document.getElementById('warShop');
+    shop.innerHTML = '';
+    unitKeys.forEach(key=>{
+      const def = UNIT_DEFS[key];
+      const btn = document.createElement('button');
+      btn.className = 'war-unit-btn';
+      btn.id = 'buy_'+key;
+      btn.innerHTML = `<span class="u-icon">${def.icon}</span><span>${def.name}</span><span class="u-cost">${def.cost}g</span>`;
+      btn.addEventListener('click', ()=>spawnPlayerUnit(key));
+      shop.appendChild(btn);
+    });
+  }
+  function refreshShop(){
+    unitKeys.forEach(key=>{
+      document.getElementById('buy_'+key).disabled = over || gold < UNIT_DEFS[key].cost;
+    });
+  }
+
+  function startLevel(n){
+    level = n;
+    gold = 200;
+    playerCastleMax = CASTLE_HP[n-1];
+    enemyCastleMax = CASTLE_HP[n-1];
+    playerCastleHP = playerCastleMax;
+    enemyCastleHP = enemyCastleMax;
+    units = [];
+    over = false; won = false;
+    enemySpawnTimer = 3;
+    goOverlay.hide();
+    document.getElementById('warLevel').textContent = level;
+    document.getElementById('warMsg').textContent = 'Baue deine Armee auf und zerstöre die gegnerische Burg!';
+    updateHUD();
+  }
+  function updateHUD(){
+    document.getElementById('warGold').textContent = Math.floor(gold);
+    document.getElementById('warPlayerBar').style.width = Math.max(0,(playerCastleHP/playerCastleMax*100))+'%';
+    document.getElementById('warEnemyBar').style.width = Math.max(0,(enemyCastleHP/enemyCastleMax*100))+'%';
+    refreshShop();
+  }
+
+  function spawnPlayerUnit(key){
+    if(over) return;
+    const def = UNIT_DEFS[key];
+    if(gold < def.cost) return;
+    if(units.filter(u=>u.side==='player').length >= MAX_UNITS_PER_SIDE){
+      document.getElementById('warMsg').textContent = 'Maximale Truppenstärke erreicht — warte, bis Einheiten fallen.';
+      return;
+    }
+    gold -= def.cost;
+    units.push(makeUnit('player', key));
+    updateHUD();
+  }
+  function spawnEnemyUnit(){
+    if(units.filter(u=>u.side==='enemy').length >= MAX_UNITS_PER_SIDE) return;
+    const key = enemyPool[Math.floor(Math.random()*Math.min(enemyPool.length, 2 + level))];
+    units.push(makeUnit('enemy', key));
+  }
+  function makeUnit(side, key){
+    const def = UNIT_DEFS[key];
+    return {
+      side, key, def,
+      x: side==='player' ? playerCastleX+10 : enemyCastleX-10,
+      y: groundY,
+      hp: def.hp, maxHp: def.hp,
+      target: null,
+      atkCooldown: 0,
+      state: key==='miner' ? 'toMine' : (key==='ninja' ? 'sneak' : 'walk'),
+      mineTimer: 0,
+      stealth: key==='ninja',
+      dead:false,
+      anim:0
+    };
+  }
+
+  function distance(a,b){ return Math.abs(a.x-b.x); }
+  function dir(u){ return u.side==='player' ? 1 : -1; }
+  function enemySide(u){ return u.side==='player' ? 'enemy' : 'player'; }
+
+  function findTarget(u){
+    let best=null, bestD=Infinity;
+    for(const o of units){
+      if(o===u || o.dead || o.side===u.side) continue;
+      if(o.stealth) continue; // Ninja im Sneak-Modus ist unsichtbar
+      const d = distance(u,o);
+      const aggro = Math.max(u.def.range, 26);
+      if(d <= aggro && d < bestD){ best=o; bestD=d; }
+    }
+    return best;
+  }
+
+  function update(dt){
+    if(over) return;
+
+    // Gegner-Spawns
+    enemySpawnTimer -= dt;
+    if(enemySpawnTimer <= 0){
+      spawnEnemyUnit();
+      enemySpawnTimer = Math.max(1.4, 4.2 - level*0.28);
+    }
+
+    for(const u of units){
+      if(u.dead) continue;
+      u.anim += dt;
+
+      if(u.def.role==='miner'){
+        updateMiner(u, dt);
+        continue;
+      }
+
+      if(u.key==='ninja' && u.stealth){
+        // sneak straight to enemy castle, ignoring all units
+        u.x += dir(u)*u.def.speed*dt;
+        const reached = u.side==='player' ? u.x >= enemyCastleX-14 : u.x <= playerCastleX+14;
+        if(reached){ u.stealth=false; u.state='attackCastle'; }
+        continue;
+      }
+
+      // Ziel prüfen
+      if(u.target && (u.target.dead || u.target.hp<=0)) u.target = null;
+      if(!u.target){
+        const t = findTarget(u);
+        if(t){ u.target = t; u.state = 'fight'; }
+      }
+
+      if(u.state === 'fight' && u.target){
+        const d = distance(u,u.target);
+        if(u.def.role==='melee'){
+          if(d > u.def.range){
+            u.x += dir(u)*u.def.speed*dt; // sich nähern
+          } else {
+            u.atkCooldown -= dt;
+            if(u.atkCooldown<=0){
+              dealDamage(u, u.target, u.def.dmg);
+              u.atkCooldown = u.def.atkTime;
+            }
+          }
+        } else { // ranged
+          if(d <= u.def.range){
+            u.atkCooldown -= dt;
+            if(u.atkCooldown<=0){
+              dealDamage(u, u.target, u.def.dmg);
+              u.atkCooldown = u.def.atkTime;
+              spawnProjectile(u, u.target);
+            }
+          } else {
+            u.x += dir(u)*u.def.speed*dt*0.6;
+          }
+        }
+        continue;
+      }
+
+      // Kein Ziel -> vormarschieren oder Burg angreifen
+      const castleX = u.side==='player' ? enemyCastleX : playerCastleX;
+      const reachedCastle = u.side==='player' ? u.x >= castleX-16 : u.x <= castleX+16;
+      if(reachedCastle){
+        if(u.state !== 'attackCastle'){
+          // Warteschlangen-Versatz, damit Angreifer nicht exakt übereinander stehen
+          const aheadCount = units.filter(o=>o!==u && !o.dead && o.state==='attackCastle' && o.side===u.side).length;
+          u.queueOffset = Math.min(aheadCount, 6) * 10;
+          u.x = u.side==='player' ? castleX-16-u.queueOffset : castleX+16+u.queueOffset;
+        }
+        u.state = 'attackCastle';
+        u.atkCooldown -= dt;
+        if(u.atkCooldown<=0){
+          const dmg = u.def.dmg || 8;
+          if(u.side==='player'){ enemyCastleHP = Math.max(0, enemyCastleHP-dmg); }
+          else { playerCastleHP = Math.max(0, playerCastleHP-dmg); }
+          u.atkCooldown = u.def.atkTime || 0.8;
+        }
+        // BUGFIX: die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an,
+        // was das Spiel nach einiger Zeit zum Stocken bringt.
+        const castleCounter = 10 + level*1.2;
+        u.hp -= castleCounter*dt;
+        if(u.hp<=0 && !u.dead){ u.dead = true; }
+      } else {
+        u.x += dir(u)*u.def.speed*dt;
+        u.state='walk';
+      }
+    }
+
+    units = units.filter(u=>!u.dead);
+    updateProjectiles(dt);
+
+    if(enemyCastleHP<=0){ over=true; won=true; finishLevel(true); }
+    else if(playerCastleHP<=0){ over=true; won=false; finishLevel(false); }
+
+    updateHUD();
+  }
+
+  function dealDamage(attacker, target, dmg){
+    target.hp -= dmg;
+    if(target.hp<=0 && !target.dead){
+      target.dead = true;
+      if(attacker.target===target) attacker.target=null;
+    }
+  }
+
+  // Bergarbeiter-Zustandsmaschine: läuft zur Mine, schürft, bringt 100 Gold zurück
+  function updateMiner(u, dt){
+    const walkSpeed = u.def.speed;
+    if(u.state==='toMine'){
+      const tx = u.side==='player' ? mineX : W-mineX;
+      const arrived = u.side==='player' ? u.x>=tx : u.x<=tx;
+      if(arrived) u.state='mining';
+      else u.x += dir(u)*walkSpeed*dt;
+    } else if(u.state==='mining'){
+      u.mineTimer += dt;
+      if(u.mineTimer >= 1.6){ u.mineTimer=0; u.state='toBase'; u.loaded=true; }
+    } else if(u.state==='toBase'){
+      const bx = u.side==='player' ? playerCastleX+10 : enemyCastleX-10;
+      const arrived = u.side==='player' ? u.x<=bx : u.x>=bx;
+      if(arrived){
+        if(u.side==='player'){ gold += 100; }
+        u.loaded=false;
+        u.state='toMine';
+      } else {
+        u.x -= dir(u)*walkSpeed*dt;
+      }
+    }
+  }
+
+  // Projektile für Bogenschütze/Magier
+  let projectiles = [];
+  function spawnProjectile(from, to){
+    projectiles.push({ x:from.x, y:groundY-40, tx:to.x, ty:groundY-40, t:0, key:from.key });
+  }
+  function updateProjectiles(dt){
+    projectiles.forEach(p=>{ p.t += dt*2.6; });
+    projectiles = projectiles.filter(p=>p.t<1);
+  }
+
+  function finishLevel(playerWon){
+    if(playerWon){
+      const hs = maybeUpdateHighscore('war', level);
+      document.getElementById('warHigh').textContent = hs;
+      if(level >= 10){
+        goOverlay.show('Alle Level geschafft!', 'Du hast alle 10 Level von War of Stickmen gemeistert! 🏆', 'win', ()=>startLevel(1));
+      } else {
+        goOverlay.show('Level geschafft!', 'Burg zerstört — weiter zu Level '+(level+1)+'.', 'win', ()=>startLevel(level+1));
+      }
+    } else {
+      goOverlay.show('Burg gefallen', 'Deine Burg wurde zerstört. Versuch Level '+level+' erneut.', 'lose', ()=>startLevel(level));
+    }
+  }
+
+  /* ---------------- Rendering ---------------- */
+  function drawCastle(x, side, hpRatio){
+    const dirSign = side==='player' ? 1 : -1;
+    ctx.fillStyle = side==='player' ? '#123a7a' : '#5c1224';
+    ctx.strokeStyle = side==='player' ? '#00f0ff' : '#ff3860';
+    ctx.lineWidth = 2;
+    const w=40,h=70;
+    const bx = side==='player' ? x-6 : x-w+6;
+    ctx.fillRect(bx, groundY-h, w, h);
+    ctx.strokeRect(bx, groundY-h, w, h);
+    for(let i=0;i<4;i++){
+      ctx.fillRect(bx+i*11, groundY-h-8, 8, 8);
+    }
+  }
+  function drawStick(u){
+    const scale = u.def.big ? 1.7 : 1;
+    const x = u.x, baseY = groundY;
+    const bodyColor = u.side==='player' ? '#00f0ff' : '#ff3860';
+    const alpha = u.stealth ? 0.3 : 1;
+    ctx.globalAlpha = alpha;
+    ctx.lineCap = 'round';
+    const headY = baseY - 34*scale;
+    const fdir = dir(u);
+    const swing = u.state==='fight' || u.state==='attackCastle' ? Math.sin(u.anim*10)*8*scale : Math.sin(u.anim*3)*2*scale;
+
+    /* ---- Klassenspezifische Farbgebung (Rüstung/Kleidung) ---- */
+    const skins = {
+      miner:     { body:'#c98a4b', accent:'#7a5228' },
+      sword:     { body:'#c7cdd6', accent:'#7d8896' },
+      archer:    { body:'#6fbf6f', accent:'#3f7a3f' },
+      berserker: { body:'#ff9d4d', accent:'#a8461a' },
+      mage:      { body:'#b98bff', accent:'#6a2fbf' },
+      ninja:     { body:'#2b2b38', accent:'#0d0d14' }
+    };
+    const skin = skins[u.key] || {body:bodyColor, accent:bodyColor};
+
+    /* ---- Beine ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x-6*scale, baseY);
+    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x+6*scale, baseY);
+    ctx.stroke();
+
+    /* ---- Robe für Magier statt Beinen (Überzeichnung) ---- */
+    if(u.key==='mage'){
+      ctx.fillStyle = skin.body;
+      ctx.beginPath();
+      ctx.moveTo(x-9*scale, baseY);
+      ctx.lineTo(x+9*scale, baseY);
+      ctx.lineTo(x+4*scale, baseY-24*scale);
+      ctx.lineTo(x-4*scale, baseY-24*scale);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    /* ---- Körper ---- */
+    ctx.strokeStyle = skin.body;
+    ctx.lineWidth = 4*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, headY+6*scale); ctx.lineTo(x, baseY-12*scale);
+    ctx.stroke();
+
+    /* ---- Arme ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x+fdir*10*scale, headY+18*scale+swing);
+    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x-fdir*6*scale, headY+18*scale);
+    ctx.stroke();
+
+    /* ---- Kopf + Klassen-Kopfschmuck ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
+    ctx.beginPath();
+    ctx.arc(x, headY, 6*scale, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.fillStyle = skin.accent;
+    if(u.key==='miner'){
+      ctx.fillRect(x-7*scale, headY-9*scale, 14*scale, 4*scale); // Helm
+    } else if(u.key==='sword'){
+      ctx.beginPath(); ctx.arc(x, headY-2*scale, 7*scale, Math.PI, Math.PI*2); ctx.fill(); // Helm-Kuppel
+    } else if(u.key==='archer'){
+      ctx.beginPath(); ctx.moveTo(x-7*scale,headY-2*scale); ctx.lineTo(x,headY-12*scale); ctx.lineTo(x+7*scale,headY-2*scale); ctx.fill(); // Kapuze
+    } else if(u.key==='berserker'){
+      ctx.fillRect(x-8*scale, headY-11*scale, 16*scale, 4*scale);
+      ctx.fillRect(x-1.5*scale, headY-16*scale, 3*scale, 6*scale); // Horn/Spitze
+    } else if(u.key==='mage'){
+      ctx.beginPath(); ctx.moveTo(x-8*scale,headY-3*scale); ctx.lineTo(x,headY-18*scale); ctx.lineTo(x+8*scale,headY-3*scale); ctx.fill(); // Spitzhut
+    } else if(u.key==='ninja'){
+      ctx.fillRect(x-7*scale, headY-3*scale, 14*scale, 5*scale); // Stirnband über Augen
+    }
+
+    /* ---- Waffen (echte Vektor-Skins statt Emoji) ---- */
+    const handX = x + fdir*10*scale, handY = headY+18*scale+swing;
+    ctx.lineWidth = 2.5*scale;
+    if(u.key==='miner'){
+      ctx.strokeStyle = '#8a8a8a';
+      ctx.beginPath(); ctx.moveTo(handX-4*scale, handY-6*scale); ctx.lineTo(handX+6*scale, handY+6*scale); ctx.stroke();
+      ctx.strokeStyle = '#5c3a1e'; ctx.lineWidth = 1.5*scale;
+      ctx.beginPath(); ctx.moveTo(handX-6*scale, handY-8*scale); ctx.lineTo(handX+2*scale, handY); ctx.stroke();
+    } else if(u.key==='sword'){
+      ctx.strokeStyle = '#e8eef5';
+      ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX+fdir*14*scale, handY-14*scale); ctx.stroke();
+      ctx.strokeStyle = '#9a7a2f'; ctx.lineWidth = 3*scale;
+      ctx.beginPath(); ctx.moveTo(handX-2*scale, handY+2*scale); ctx.lineTo(handX+2*scale, handY-2*scale); ctx.stroke();
+    } else if(u.key==='archer'){
+      ctx.strokeStyle = '#8a5a2f';
+      ctx.beginPath(); ctx.arc(handX, handY-2*scale, 10*scale, -1.1, 1.1); ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(handX+8*scale*Math.cos(-1.1), handY-2*scale+8*scale*Math.sin(-1.1));
+      ctx.lineTo(handX+8*scale*Math.cos(1.1), handY-2*scale+8*scale*Math.sin(1.1)); ctx.stroke();
+    } else if(u.key==='berserker'){
+      ctx.strokeStyle = '#5c4632'; ctx.lineWidth=3*scale;
+      ctx.beginPath(); ctx.moveTo(handX,handY); ctx.lineTo(handX+fdir*16*scale, handY-10*scale); ctx.stroke();
+      ctx.fillStyle = '#7a7a85';
+      ctx.fillRect(handX+fdir*13*scale-5*scale, handY-18*scale, 10*scale, 10*scale);
+    } else if(u.key==='mage'){
+      ctx.strokeStyle = '#6a4a2f'; ctx.lineWidth=2*scale;
+      ctx.beginPath(); ctx.moveTo(handX,handY+6*scale); ctx.lineTo(handX+fdir*4*scale, handY-16*scale); ctx.stroke();
+      const glow = ctx.createRadialGradient(handX+fdir*4*scale, handY-16*scale,1, handX+fdir*4*scale, handY-16*scale,7*scale);
+      glow.addColorStop(0,'rgba(255,140,40,0.95)'); glow.addColorStop(1,'rgba(255,140,40,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(handX+fdir*4*scale, handY-16*scale, 7*scale, 0, Math.PI*2); ctx.fill();
+    } else if(u.key==='ninja'){
+      ctx.strokeStyle = '#cfd6e0'; ctx.lineWidth=2*scale;
+      ctx.beginPath(); ctx.moveTo(handX-3*scale,handY); ctx.lineTo(handX+fdir*8*scale, handY-8*scale); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(handX-3*scale,handY+4*scale); ctx.lineTo(handX-fdir*7*scale, handY-4*scale); ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+    /* ---- HP-Leiste ---- */
+    const barW = 22*scale;
+    ctx.fillStyle='#03010a';
+    ctx.fillRect(x-barW/2, headY-24*scale, barW, 4);
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(x-barW/2, headY-24*scale, barW*Math.max(0,u.hp/u.maxHp), 4);
+  }
+  function draw(){
+    ctx.drawImage(landscape, 0, 0);
+    // Minen-Symbole
+    ctx.fillStyle = '#3a2a52';
+    [mineX, W-mineX].forEach(mx=>{
+      ctx.beginPath();
+      ctx.moveTo(mx-14,groundY); ctx.lineTo(mx,groundY-20); ctx.lineTo(mx+14,groundY);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(0,240,255,0.4)';
+      ctx.fillRect(mx-3,groundY-14,6,4);
+      ctx.fillStyle = '#3a2a52';
+    });
+
+    drawCastle(playerCastleX, 'player');
+    drawCastle(enemyCastleX, 'enemy');
+
+    units.forEach(drawStick);
+
+    projectiles.forEach(p=>{
+      const x = p.x + (p.tx-p.x)*p.t;
+      const y = p.y + (p.ty-p.y)*p.t;
+      if(p.key==='mage'){
+        const g = ctx.createRadialGradient(x,y,1,x,y,7);
+        g.addColorStop(0,'rgba(255,140,40,0.95)'); g.addColorStop(1,'rgba(255,140,40,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.strokeStyle = '#e8eef5'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x-6,y); ctx.lineTo(x+6,y); ctx.stroke();
+      }
+    });
+
+    if(over){
+      ctx.fillStyle='rgba(3,1,10,0.4)';
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+
+  function loop(time){
+    if(!lastTime) lastTime = time;
+    const dt = Math.min(0.05,(time-lastTime)/1000);
+    lastTime = time;
+    update(dt);
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  buildShop();
+  startLevel(1);
+  rafId = requestAnimationFrame(loop);
+
+  return function stop(){
+    cancelAnimationFrame(rafId);
   };
 }
 </script>
