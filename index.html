@@ -283,6 +283,13 @@
     animation:fadeIn .18s ease;
   }
   .overlay.active{display:flex;}
+  /* Während ein Canvas-Spiel läuft, kostet ständig neu berechneter
+     Hintergrund-Blur spürbar Leistung — hier deaktivieren, dafür etwas
+     dunklerer Hintergrund als Ausgleich. */
+  #playModal.overlay{
+    backdrop-filter:none;
+    background:rgba(3,1,8,0.92);
+  }
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
   .modal{
@@ -611,6 +618,58 @@
     min-height:1.1em;
   }
 
+  /* ---------- Fruit Merge Legende ---------- */
+  .fruit-legend-wrap{
+    max-width:360px;
+    margin:0 auto;
+  }
+  .fruit-legend-title{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:0.8rem;
+    letter-spacing:0.5px;
+    margin-bottom:4px;
+  }
+  .fruit-legend{
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:2px 0;
+    padding:8px 10px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .fruit-legend .step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1px;
+    width:44px;
+    font-size:1.1rem;
+  }
+  .fruit-legend .step .f-name{
+    font-size:0.55rem;
+    color:var(--text-dim);
+    text-align:center;
+    line-height:1.1;
+    white-space:pre-line;
+  }
+  .fruit-legend .arrow{
+    color:var(--text-dim);
+    font-size:0.8rem;
+    align-self:center;
+    margin:0 1px;
+  }
+  .fruit-legend .step.reached{
+    filter:drop-shadow(0 0 6px rgba(0,240,255,0.7));
+  }
+  .fruit-legend .step.reached .f-name{ color:var(--cyan); }
+  .fruit-legend .step.locked{
+    opacity:0.35;
+  }
+
   @media (max-width: 760px){
     nav .links{ display:none; }
     .cards{ grid-template-columns:1fr; max-width:480px; }
@@ -659,7 +718,7 @@
       <article class="card" id="gameOpenBtn">
         <div class="icon">🎮</div>
         <h3>Arcade</h3>
-        <p>Snake, Stickman Fight, Tetris-Block-Blast und Fruit Merge — wähl dein Spiel im Menü.</p>
+        <p>Snake, Stickman Fight, Tetris und Fruit Merge — wähl dein Spiel im Menü.</p>
         <span class="card-cta">Spiele anzeigen →</span>
       </article>
       <article class="card">
@@ -727,7 +786,7 @@
     <div class="game-list">
       <button data-game="snake"><span class="g-icon">🐍</span> Snake</button>
       <button data-game="fight"><span class="g-icon">🥋</span> Stickman Fight</button>
-      <button data-game="blast"><span class="g-icon">🧱</span> Block Blast</button>
+      <button data-game="blast"><span class="g-icon">🧱</span> Tetris</button>
       <button data-game="merge"><span class="g-icon">🍉</span> Fruit Merge</button>
       <button data-game="war"><span class="g-icon">⚔️</span> War of Stickmen</button>
     </div>
@@ -749,6 +808,117 @@
 /* ---------------- Modal Helpers ---------------- */
 function openModal(id){document.getElementById(id).classList.add('active');}
 function closeModal(id){document.getElementById(id).classList.remove('active');}
+
+/* ---------------- Highscore Helper (localStorage) ---------------- */
+function getHighscore(key){
+  try{ return parseInt(localStorage.getItem('recharger_hs_'+key) || '0', 10) || 0; }
+  catch(e){ return 0; }
+}
+function setHighscore(key, val){
+  try{ localStorage.setItem('recharger_hs_'+key, String(val)); }catch(e){}
+}
+function maybeUpdateHighscore(key, val){
+  const hs = getHighscore(key);
+  if(val > hs){ setHighscore(key, val); return val; }
+  return hs;
+}
+
+/* ---------------- Landschafts-Generator (für Fight & War) ----------------
+   Zeichnet einmalig eine Cyberpunk-Landschaft (Himmel, Berge, Hügel, Boden)
+   auf einen Offscreen-Canvas, der dann pro Frame nur noch kopiert wird. */
+function seededRandom(seed){
+  let s = seed;
+  return function(){ s = (s*9301+49297) % 233280; return s/233280; };
+}
+function drawRidge(ctx, W, baseY, peakMinY, segments, seed, fill){
+  const rnd = seededRandom(seed);
+  ctx.beginPath();
+  ctx.moveTo(0, baseY);
+  const step = W/segments;
+  for(let i=0;i<=segments;i++){
+    const x = i*step;
+    const y = peakMinY + rnd()*(baseY-peakMinY)*0.6;
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W, baseY);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+function createLandscape(W, H, groundY){
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const c = off.getContext('2d');
+
+  // Himmel
+  const sky = c.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#180a35');
+  sky.addColorStop(0.55,'#241049');
+  sky.addColorStop(1,'#33195c');
+  c.fillStyle = sky;
+  c.fillRect(0,0,W,groundY);
+
+  // Leuchtender Mond
+  const moonX = W*0.8, moonY = groundY*0.22;
+  const glow = c.createRadialGradient(moonX,moonY,4,moonX,moonY,70);
+  glow.addColorStop(0,'rgba(0,240,255,0.85)');
+  glow.addColorStop(1,'rgba(0,240,255,0)');
+  c.fillStyle = glow;
+  c.beginPath(); c.arc(moonX,moonY,70,0,Math.PI*2); c.fill();
+  c.fillStyle = '#eafcff';
+  c.beginPath(); c.arc(moonX,moonY,13,0,Math.PI*2); c.fill();
+
+  // Sterne
+  const starRnd = seededRandom(99);
+  c.fillStyle = 'rgba(255,255,255,0.5)';
+  for(let i=0;i<40;i++){
+    c.fillRect(starRnd()*W, starRnd()*groundY*0.7, 1.5, 1.5);
+  }
+
+  // Ferne Bergkette (Silhouette, Skyline-artig)
+  drawRidge(c, W, groundY, groundY*0.42, 7, 1234, '#20103f');
+  // Neon-Skyline: einige rechteckige "Türme" mit Fensterlichtern
+  const towerRnd = seededRandom(4242);
+  for(let i=0;i<6;i++){
+    const tw = 14+towerRnd()*22;
+    const th = 30+towerRnd()*(groundY*0.4);
+    const tx = towerRnd()*W;
+    c.fillStyle = '#180d33';
+    c.fillRect(tx, groundY-th, tw, th);
+    c.fillStyle = towerRnd()>0.5 ? 'rgba(0,240,255,0.5)' : 'rgba(255,43,214,0.4)';
+    for(let wy=groundY-th+6; wy<groundY-6; wy+=10){
+      for(let wx=tx+3; wx<tx+tw-3; wx+=7){
+        if(towerRnd()>0.4) c.fillRect(wx,wy,3,4);
+      }
+    }
+  }
+
+  // Nahe Hügelkette mit Neon-Kontur
+  drawRidge(c, W, groundY, groundY*0.68, 6, 777, '#2a1450');
+  c.strokeStyle = 'rgba(0,240,255,0.25)';
+  c.lineWidth = 1.5;
+
+  // Boden
+  const groundGrad = c.createLinearGradient(0,groundY,0,H);
+  groundGrad.addColorStop(0,'#150826');
+  groundGrad.addColorStop(1,'#05020c');
+  c.fillStyle = groundGrad;
+  c.fillRect(0,groundY,W,H-groundY);
+  c.strokeStyle = 'rgba(0,240,255,0.4)';
+  c.lineWidth = 2;
+  c.beginPath(); c.moveTo(0,groundY); c.lineTo(W,groundY); c.stroke();
+
+  // Gras-/Steinbüschel
+  const grassRnd = seededRandom(555);
+  for(let i=0;i<Math.floor(W/16);i++){
+    const gx = grassRnd()*W;
+    c.strokeStyle = 'rgba(0,240,255,0.3)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(gx,groundY); c.lineTo(gx-3,groundY-7); c.stroke();
+    c.beginPath(); c.moveTo(gx,groundY); c.lineTo(gx+3,groundY-7); c.stroke();
+  }
+  return off;
+}
 
 document.getElementById('calcOpenBtn').onclick = ()=>openModal('calcModal');
 document.getElementById('gameOpenBtn').onclick = ()=>openModal('gameMenuModal');
@@ -820,7 +990,7 @@ function stopCurrentGame(){
 const titles = {
   snake:'Snake',
   fight:'Stickman Fight',
-  blast:'Block Blast',
+  blast:'Tetris',
   merge:'Fruit Merge',
   war:'War of Stickmen'
 };
@@ -871,7 +1041,7 @@ function createGameOverOverlay(wrapEl){
 ================================================================= */
 function initSnake(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="snakeScore">0</span></div>
+    <div class="score">Punkte: <span id="snakeScore">0</span> &nbsp;|&nbsp; 🏆 Highscore: <span id="snakeHigh">0</span></div>
     <div class="game-stage" id="snakeStage">
       <canvas id="snakeCanvas" width="320" height="320"></canvas>
     </div>
@@ -883,6 +1053,8 @@ function initSnake(area){
   const grid = 16;
   const cells = canvas.width/grid;
   let snake, dir, nextDir, food, score, alive, loopId;
+
+  document.getElementById('snakeHigh').textContent = getHighscore('snake');
 
   function reset(){
     snake = [{x:8,y:8},{x:7,y:8},{x:6,y:8}];
@@ -910,7 +1082,9 @@ function initSnake(area){
       ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
     });
     if(!alive){
-      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht.', 'lose', ()=>{ reset(); draw(); });
+      const hs = maybeUpdateHighscore('snake', score);
+      document.getElementById('snakeHigh').textContent = hs;
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); draw(); });
     }
   }
   function step(){
@@ -978,6 +1152,7 @@ function initFight(area){
         <div class="bar-outer"><div class="bar-inner foe" id="foeBar" style="width:100%"></div></div>
       </div>
     </div>
+    <div class="score">🏆 Beste Serie: <span id="fightHigh">0</span> &nbsp;|&nbsp; Aktuelle Serie: <span id="fightStreak">0</span></div>
     <div class="game-stage" id="fightStage">
       <canvas id="fightCanvas" width="360" height="200"></canvas>
     </div>
@@ -998,8 +1173,11 @@ function initFight(area){
   const goOverlay = createGameOverOverlay(document.getElementById('fightStage'));
   const groundY = 160;
   const W = canvas.width;
-  let over = false, rafId;
+  const landscape = createLandscape(W, canvas.height, groundY);
+  let over = false, rafId, streak = 0;
   const msg = document.getElementById('fightMsg');
+
+  document.getElementById('fightHigh').textContent = getHighscore('fight');
 
   const you = { x:60, y:groundY, vy:0, onGround:true, facing:1, hp:100, punchTimer:0, hitCooldown:0 };
   const foe = { x:280, y:groundY, vy:0, onGround:true, facing:-1, hp:100, punchTimer:0, hitCooldown:0, aiTimer:0 };
@@ -1061,9 +1239,18 @@ function initFight(area){
   function endFight(){
     over = true;
     const won = foe.hp<=0 && you.hp>0;
+    if(won){
+      streak++;
+      const hs = maybeUpdateHighscore('fight', streak);
+      document.getElementById('fightHigh').textContent = hs;
+      document.getElementById('fightStreak').textContent = streak;
+    } else {
+      streak = 0;
+      document.getElementById('fightStreak').textContent = streak;
+    }
     goOverlay.show(
       won ? 'Sieg!' : 'Niederlage',
-      won ? 'Du hast den Gegner besiegt! 🎉' : 'Der Gegner war stärker — versuch es nochmal!',
+      won ? `Du hast den Gegner besiegt! 🎉 (Serie: ${streak})` : 'Der Gegner war stärker — deine Serie wurde zurückgesetzt.',
       won ? 'win' : 'lose',
       restartFight
     );
@@ -1104,10 +1291,7 @@ function initFight(area){
   }
 
   function draw(){
-    ctx.fillStyle = '#081733';
-    ctx.fillRect(0,0,W,canvas.height);
-    ctx.strokeStyle = 'rgba(94,200,255,0.3)';
-    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+    ctx.drawImage(landscape, 0, 0);
     drawStick(you, '#5ec8ff');
     drawStick(foe, '#e05d6f');
     if(over){
@@ -1163,11 +1347,11 @@ function initFight(area){
 }
 
 /* =================================================================
-   BLOCK BLAST (Tetris)
+   TETRIS
 ================================================================= */
 function initBlast(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="blastScore">0</span> &nbsp;|&nbsp; Level: <span id="blastLevel">1</span></div>
+    <div class="score">Punkte: <span id="blastScore">0</span> &nbsp;|&nbsp; Level: <span id="blastLevel">1</span> &nbsp;|&nbsp; 🏆 <span id="blastHigh">0</span></div>
     <div class="game-stage" id="blastStage">
       <canvas id="blastCanvas" width="240" height="440"></canvas>
     </div>
@@ -1204,6 +1388,8 @@ function initBlast(area){
   const keys = Object.keys(shapes);
 
   let board, cur, score, level, dropInterval, dropTimer, over, rafId, lastTime;
+
+  document.getElementById('blastHigh').textContent = getHighscore('blast');
 
   function newPiece(){
     const k = keys[Math.floor(Math.random()*keys.length)];
@@ -1257,7 +1443,9 @@ function initBlast(area){
     cur = newPiece();
     if(collides(cur.shape, cur.x, cur.y)){
       over = true;
-      goOverlay.show('Game Over', 'Du hast '+score+' Punkte in Level '+level+' erreicht.', 'lose', ()=>{ reset(); });
+      const hs = maybeUpdateHighscore('blast', score);
+      document.getElementById('blastHigh').textContent = hs;
+      goOverlay.show('Game Over', 'Du hast '+score+' Punkte in Level '+level+' erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); });
     }
   }
   function rotate(){
@@ -1338,7 +1526,11 @@ function initBlast(area){
 ================================================================= */
 function initMerge(area){
   area.innerHTML = `
-    <div class="score">Punkte: <span id="mergeScore">0</span></div>
+    <div class="score">Punkte: <span id="mergeScore">0</span> &nbsp;|&nbsp; 🏆 Highscore: <span id="mergeHigh">0</span></div>
+    <div class="fruit-legend-wrap">
+      <div class="fruit-legend-title">Alle Früchte in der Merge-Kette</div>
+      <div class="fruit-legend" id="fruitLegend"></div>
+    </div>
     <div class="game-stage" id="mergeStage">
       <div id="mergeGrid"></div>
     </div>
@@ -1348,14 +1540,40 @@ function initMerge(area){
   const gridEl = document.getElementById('mergeGrid');
   const goOverlay = createGameOverOverlay(document.getElementById('mergeStage'));
   gridEl.style.gridTemplateColumns = `repeat(${size}, 64px)`;
-  const fruits = ['🍒','🍓','🍊','🍎','🍍','🍉','🍈','🥥'];
-  let board, score, over;
+  // Fortsetzung der Kette über die Kokosnuss hinaus:
+  const fruits = [
+    {e:'🍒', n:'Kirsche'},
+    {e:'🍓', n:'Erdbeere'},
+    {e:'🍊', n:'Orange'},
+    {e:'🍎', n:'Apfel'},
+    {e:'🍍', n:'Ananas'},
+    {e:'🍉', n:'Wasser-\nmelone'},
+    {e:'🍈', n:'Honig-\nmelone'},
+    {e:'🥥', n:'Kokosnuss'},
+    {e:'🥭', n:'Mango'},
+    {e:'🎃', n:'Kürbis'},
+    {e:'🌟', n:'Superfrucht'}
+  ];
+  let board, score, over, highestReached;
+
+  document.getElementById('mergeHigh').textContent = getHighscore('merge');
+
+  function renderLegend(){
+    const el = document.getElementById('fruitLegend');
+    el.innerHTML = fruits.map((f,i)=>{
+      const reached = i <= highestReached;
+      const step = `<span class="step ${reached?'reached':'locked'}"><span>${f.e}</span><span class="f-name">${f.n}</span></span>`;
+      return step + (i<fruits.length-1 ? '<span class="arrow">→</span>' : '');
+    }).join('');
+  }
 
   function reset(){
     board = Array.from({length:size},()=>Array(size).fill(0));
     score = 0;
     over = false;
+    highestReached = 0;
     goOverlay.hide();
+    renderLegend();
     addRandom(); addRandom();
     render();
   }
@@ -1376,7 +1594,11 @@ function initMerge(area){
         cell.style.height='64px';
         cell.style.fontSize='2rem';
         cell.style.background = '#0f2a5c';
-        if(board[r][c]) cell.textContent = fruits[Math.min(board[r][c]-1, fruits.length-1)];
+        if(board[r][c]){
+          const idx = Math.min(board[r][c]-1, fruits.length-1);
+          cell.textContent = fruits[idx].e;
+          if(idx > highestReached){ highestReached = idx; renderLegend(); }
+        }
         gridEl.appendChild(cell);
       }
     }
@@ -1430,8 +1652,11 @@ function initMerge(area){
       over = true;
       let best = 0;
       board.forEach(row=>row.forEach(v=>{ if(v>best) best=v; }));
-      const bestFruit = fruits[Math.min(best-1, fruits.length-1)] || '';
-      goOverlay.show('Game Over', `Keine Züge mehr möglich — ${score} Punkte, größte Frucht ${bestFruit}.`, 'lose', reset);
+      const bf = fruits[Math.min(best-1, fruits.length-1)];
+      const bestFruit = bf ? bf.e + ' ' + bf.n.replace('\n','') : '';
+      const hs = maybeUpdateHighscore('merge', score);
+      document.getElementById('mergeHigh').textContent = hs;
+      goOverlay.show('Game Over', `Keine Züge mehr möglich — ${score} Punkte, größte Frucht ${bestFruit}. (Highscore: ${hs})`, 'lose', reset);
     }
   }
   function keyHandler(e){
@@ -1482,6 +1707,7 @@ function initWar(area){
     <div class="war-hud">
       <span class="lvl">LEVEL <span id="warLevel">1</span> / 10</span>
       <span class="gold">💰 <span id="warGold">200</span></span>
+      <span class="lvl">🏆 Bestes Level: <span id="warHigh">1</span></span>
     </div>
     <div class="war-castles">
       <div class="side player">
@@ -1507,9 +1733,13 @@ function initWar(area){
   const groundY = H - 30;
   const playerCastleX = 34, enemyCastleX = W - 34;
   const mineX = 100;
+  const landscape = createLandscape(W, H, groundY);
+  const MAX_UNITS_PER_SIDE = 10;
+
+  document.getElementById('warHigh').textContent = getHighscore('war') || 1;
 
   let level, gold, playerCastleHP, playerCastleMax, enemyCastleHP, enemyCastleMax;
-  let units, over, won, rafId, lastTime, enemySpawnTimer;
+  let units, over, won, rafId, lastTime, enemySpawnTimer, hudTimer = 0;
 
   function buildShop(){
     const shop = document.getElementById('warShop');
@@ -1556,11 +1786,16 @@ function initWar(area){
     if(over) return;
     const def = UNIT_DEFS[key];
     if(gold < def.cost) return;
+    if(units.filter(u=>u.side==='player').length >= MAX_UNITS_PER_SIDE){
+      document.getElementById('warMsg').textContent = 'Maximale Truppenstärke erreicht — warte, bis Einheiten fallen.';
+      return;
+    }
     gold -= def.cost;
     units.push(makeUnit('player', key));
     updateHUD();
   }
   function spawnEnemyUnit(){
+    if(units.filter(u=>u.side==='enemy').length >= MAX_UNITS_PER_SIDE) return;
     const key = enemyPool[Math.floor(Math.random()*Math.min(enemyPool.length, 2 + level))];
     units.push(makeUnit('enemy', key));
   }
@@ -1662,6 +1897,12 @@ function initWar(area){
       const castleX = u.side==='player' ? enemyCastleX : playerCastleX;
       const reachedCastle = u.side==='player' ? u.x >= castleX-16 : u.x <= castleX+16;
       if(reachedCastle){
+        if(u.state !== 'attackCastle'){
+          // Warteschlangen-Versatz, damit Angreifer nicht exakt übereinander stehen
+          const aheadCount = units.filter(o=>o!==u && !o.dead && o.state==='attackCastle' && o.side===u.side).length;
+          u.queueOffset = Math.min(aheadCount, 6) * 10;
+          u.x = u.side==='player' ? castleX-16-u.queueOffset : castleX+16+u.queueOffset;
+        }
         u.state = 'attackCastle';
         u.atkCooldown -= dt;
         if(u.atkCooldown<=0){
@@ -1670,6 +1911,11 @@ function initWar(area){
           else { playerCastleHP = Math.max(0, playerCastleHP-dmg); }
           u.atkCooldown = u.def.atkTime || 0.8;
         }
+        // BUGFIX: die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an,
+        // was das Spiel nach einiger Zeit zum Stocken bringt.
+        const castleCounter = 10 + level*1.2;
+        u.hp -= castleCounter*dt;
+        if(u.hp<=0 && !u.dead){ u.dead = true; }
       } else {
         u.x += dir(u)*u.def.speed*dt;
         u.state='walk';
@@ -1682,7 +1928,14 @@ function initWar(area){
     if(enemyCastleHP<=0){ over=true; won=true; finishLevel(true); }
     else if(playerCastleHP<=0){ over=true; won=false; finishLevel(false); }
 
-    updateHUD();
+    // HUD nur gedrosselt aktualisieren (ca. 6x/Sek. statt 60x/Sek.) —
+    // ständige DOM-Schreibzugriffe (Balkenbreite, Button-disabled) pro Frame
+    // waren eine Hauptursache für das Ruckeln.
+    hudTimer += dt;
+    if(hudTimer >= 0.15 || over){
+      hudTimer = 0;
+      updateHUD();
+    }
   }
 
   function dealDamage(attacker, target, dmg){
@@ -1729,6 +1982,8 @@ function initWar(area){
 
   function finishLevel(playerWon){
     if(playerWon){
+      const hs = maybeUpdateHighscore('war', level);
+      document.getElementById('warHigh').textContent = hs;
       if(level >= 10){
         goOverlay.show('Alle Level geschafft!', 'Du hast alle 10 Level von War of Stickmen gemeistert! 🏆', 'win', ()=>startLevel(1));
       } else {
@@ -1756,45 +2011,140 @@ function initWar(area){
   function drawStick(u){
     const scale = u.def.big ? 1.7 : 1;
     const x = u.x, baseY = groundY;
-    const color = u.side==='player' ? '#00f0ff' : '#ff3860';
-    const alpha = u.stealth ? 0.35 : 1;
+    const bodyColor = u.side==='player' ? '#00f0ff' : '#ff3860';
+    const alpha = u.stealth ? 0.3 : 1;
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3*scale;
+    ctx.lineCap = 'round';
     const headY = baseY - 34*scale;
+    const fdir = dir(u);
+    const swing = u.state==='fight' || u.state==='attackCastle' ? Math.sin(u.anim*10)*8*scale : Math.sin(u.anim*3)*2*scale;
+
+    /* ---- Klassenspezifische Farbgebung (Rüstung/Kleidung) ---- */
+    const skins = {
+      miner:     { body:'#c98a4b', accent:'#7a5228' },
+      sword:     { body:'#c7cdd6', accent:'#7d8896' },
+      archer:    { body:'#6fbf6f', accent:'#3f7a3f' },
+      berserker: { body:'#ff9d4d', accent:'#a8461a' },
+      mage:      { body:'#b98bff', accent:'#6a2fbf' },
+      ninja:     { body:'#2b2b38', accent:'#0d0d14' }
+    };
+    const skin = skins[u.key] || {body:bodyColor, accent:bodyColor};
+
+    /* ---- Beine ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x-6*scale, baseY);
+    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x+6*scale, baseY);
+    ctx.stroke();
+
+    /* ---- Robe für Magier statt Beinen (Überzeichnung) ---- */
+    if(u.key==='mage'){
+      ctx.fillStyle = skin.body;
+      ctx.beginPath();
+      ctx.moveTo(x-9*scale, baseY);
+      ctx.lineTo(x+9*scale, baseY);
+      ctx.lineTo(x+4*scale, baseY-24*scale);
+      ctx.lineTo(x-4*scale, baseY-24*scale);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    /* ---- Körper ---- */
+    ctx.strokeStyle = skin.body;
+    ctx.lineWidth = 4*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, headY+6*scale); ctx.lineTo(x, baseY-12*scale);
+    ctx.stroke();
+
+    /* ---- Arme ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
+    ctx.beginPath();
+    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x+fdir*10*scale, headY+18*scale+swing);
+    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x-fdir*6*scale, headY+18*scale);
+    ctx.stroke();
+
+    /* ---- Kopf + Klassen-Kopfschmuck ---- */
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 3*scale;
     ctx.beginPath();
     ctx.arc(x, headY, 6*scale, 0, Math.PI*2);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, headY+6*scale); ctx.lineTo(x, baseY-12*scale);
-    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x-6*scale, baseY);
-    ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x+6*scale, baseY);
-    const swing = Math.sin(u.anim*6)*6*scale;
-    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x+dir(u)*10*scale, headY+18*scale+ (u.state==='fight'?swing:0));
-    ctx.moveTo(x, headY+12*scale); ctx.lineTo(x-dir(u)*6*scale, headY+18*scale);
-    ctx.stroke();
-    // Waffen-Icon über der Figur
-    ctx.font = (10*scale)+'px sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText(u.def.icon, x, headY-10*scale);
+    ctx.fillStyle = skin.accent;
+    if(u.key==='miner'){
+      ctx.fillRect(x-7*scale, headY-9*scale, 14*scale, 4*scale); // Helm
+    } else if(u.key==='sword'){
+      ctx.beginPath(); ctx.arc(x, headY-2*scale, 7*scale, Math.PI, Math.PI*2); ctx.fill(); // Helm-Kuppel
+    } else if(u.key==='archer'){
+      ctx.beginPath(); ctx.moveTo(x-7*scale,headY-2*scale); ctx.lineTo(x,headY-12*scale); ctx.lineTo(x+7*scale,headY-2*scale); ctx.fill(); // Kapuze
+    } else if(u.key==='berserker'){
+      ctx.fillRect(x-8*scale, headY-11*scale, 16*scale, 4*scale);
+      ctx.fillRect(x-1.5*scale, headY-16*scale, 3*scale, 6*scale); // Horn/Spitze
+    } else if(u.key==='mage'){
+      ctx.beginPath(); ctx.moveTo(x-8*scale,headY-3*scale); ctx.lineTo(x,headY-18*scale); ctx.lineTo(x+8*scale,headY-3*scale); ctx.fill(); // Spitzhut
+    } else if(u.key==='ninja'){
+      ctx.fillRect(x-7*scale, headY-3*scale, 14*scale, 5*scale); // Stirnband über Augen
+    }
+
+    /* ---- Waffen (echte Vektor-Skins statt Emoji) ---- */
+    const handX = x + fdir*10*scale, handY = headY+18*scale+swing;
+    ctx.lineWidth = 2.5*scale;
+    if(u.key==='miner'){
+      ctx.strokeStyle = '#8a8a8a';
+      ctx.beginPath(); ctx.moveTo(handX-4*scale, handY-6*scale); ctx.lineTo(handX+6*scale, handY+6*scale); ctx.stroke();
+      ctx.strokeStyle = '#5c3a1e'; ctx.lineWidth = 1.5*scale;
+      ctx.beginPath(); ctx.moveTo(handX-6*scale, handY-8*scale); ctx.lineTo(handX+2*scale, handY); ctx.stroke();
+    } else if(u.key==='sword'){
+      ctx.strokeStyle = '#e8eef5';
+      ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX+fdir*14*scale, handY-14*scale); ctx.stroke();
+      ctx.strokeStyle = '#9a7a2f'; ctx.lineWidth = 3*scale;
+      ctx.beginPath(); ctx.moveTo(handX-2*scale, handY+2*scale); ctx.lineTo(handX+2*scale, handY-2*scale); ctx.stroke();
+    } else if(u.key==='archer'){
+      ctx.strokeStyle = '#8a5a2f';
+      ctx.beginPath(); ctx.arc(handX, handY-2*scale, 10*scale, -1.1, 1.1); ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(handX+8*scale*Math.cos(-1.1), handY-2*scale+8*scale*Math.sin(-1.1));
+      ctx.lineTo(handX+8*scale*Math.cos(1.1), handY-2*scale+8*scale*Math.sin(1.1)); ctx.stroke();
+    } else if(u.key==='berserker'){
+      ctx.strokeStyle = '#5c4632'; ctx.lineWidth=3*scale;
+      ctx.beginPath(); ctx.moveTo(handX,handY); ctx.lineTo(handX+fdir*16*scale, handY-10*scale); ctx.stroke();
+      ctx.fillStyle = '#7a7a85';
+      ctx.fillRect(handX+fdir*13*scale-5*scale, handY-18*scale, 10*scale, 10*scale);
+    } else if(u.key==='mage'){
+      ctx.strokeStyle = '#6a4a2f'; ctx.lineWidth=2*scale;
+      ctx.beginPath(); ctx.moveTo(handX,handY+6*scale); ctx.lineTo(handX+fdir*4*scale, handY-16*scale); ctx.stroke();
+      // Einfacher zweifarbiger Kreis statt Gradient (spart Rechenzeit bei vielen Einheiten)
+      ctx.fillStyle = 'rgba(255,140,40,0.35)';
+      ctx.beginPath(); ctx.arc(handX+fdir*4*scale, handY-16*scale, 7*scale, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,180,80,0.9)';
+      ctx.beginPath(); ctx.arc(handX+fdir*4*scale, handY-16*scale, 3.5*scale, 0, Math.PI*2); ctx.fill();
+    } else if(u.key==='ninja'){
+      ctx.strokeStyle = '#cfd6e0'; ctx.lineWidth=2*scale;
+      ctx.beginPath(); ctx.moveTo(handX-3*scale,handY); ctx.lineTo(handX+fdir*8*scale, handY-8*scale); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(handX-3*scale,handY+4*scale); ctx.lineTo(handX-fdir*7*scale, handY-4*scale); ctx.stroke();
+    }
+
     ctx.globalAlpha = 1;
-    // HP-Leiste
+    /* ---- HP-Leiste ---- */
     const barW = 22*scale;
     ctx.fillStyle='#03010a';
-    ctx.fillRect(x-barW/2, headY-22*scale, barW, 4);
-    ctx.fillStyle = u.side==='player' ? '#00f0ff' : '#ff3860';
-    ctx.fillRect(x-barW/2, headY-22*scale, barW*Math.max(0,u.hp/u.maxHp), 4);
+    ctx.fillRect(x-barW/2, headY-24*scale, barW, 4);
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(x-barW/2, headY-24*scale, barW*Math.max(0,u.hp/u.maxHp), 4);
   }
   function draw(){
-    ctx.fillStyle = '#03010a';
-    ctx.fillRect(0,0,W,H);
-    // Boden
-    ctx.strokeStyle = 'rgba(0,240,255,0.25)';
-    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
-    // Mine-Markierungen
-    ctx.font='16px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('⛰️', mineX, groundY+18);
-    ctx.fillText('⛰️', W-mineX, groundY+18);
+    ctx.drawImage(landscape, 0, 0);
+    // Minen-Symbole
+    ctx.fillStyle = '#3a2a52';
+    [mineX, W-mineX].forEach(mx=>{
+      ctx.beginPath();
+      ctx.moveTo(mx-14,groundY); ctx.lineTo(mx,groundY-20); ctx.lineTo(mx+14,groundY);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(0,240,255,0.4)';
+      ctx.fillRect(mx-3,groundY-14,6,4);
+      ctx.fillStyle = '#3a2a52';
+    });
 
     drawCastle(playerCastleX, 'player');
     drawCastle(enemyCastleX, 'enemy');
@@ -1804,8 +2154,15 @@ function initWar(area){
     projectiles.forEach(p=>{
       const x = p.x + (p.tx-p.x)*p.t;
       const y = p.y + (p.ty-p.y)*p.t;
-      ctx.font='14px sans-serif';
-      ctx.fillText(p.key==='mage' ? '🔥' : '➶', x, y);
+      if(p.key==='mage'){
+        ctx.fillStyle = 'rgba(255,140,40,0.35)';
+        ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,180,80,0.9)';
+        ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.strokeStyle = '#e8eef5'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x-6,y); ctx.lineTo(x+6,y); ctx.stroke();
+      }
     });
 
     if(over){
