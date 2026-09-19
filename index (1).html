@@ -618,6 +618,132 @@
     min-height:1.1em;
   }
 
+  /* ---------- Hackertyper ---------- */
+  .hacker-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    width:100%;
+  }
+  .hacker-term{
+    width:100%;
+    max-width:520px;
+    height:280px;
+    background:#000;
+    border:1px solid rgba(0,255,120,0.35);
+    border-radius:10px;
+    box-shadow:0 0 24px rgba(0,255,120,0.15) inset, 0 0 18px rgba(0,255,120,0.15);
+    color:#3dff6e;
+    font-family:'Courier New',ui-monospace,monospace;
+    font-size:0.78rem;
+    line-height:1.35;
+    padding:12px;
+    overflow-y:auto;
+    white-space:pre-wrap;
+    word-break:break-all;
+    text-shadow:0 0 6px rgba(61,255,110,0.6);
+    cursor:text;
+  }
+  .hacker-term .cursor{
+    display:inline-block;
+    width:7px;height:13px;
+    background:#3dff6e;
+    box-shadow:0 0 8px rgba(61,255,110,0.9);
+    animation:hackerBlink 1s steps(1) infinite;
+    vertical-align:middle;
+  }
+  @keyframes hackerBlink{ 50%{ opacity:0; } }
+  .hacker-hidden-input{
+    position:absolute;
+    opacity:0;
+    height:0;width:0;
+    pointer-events:none;
+  }
+  .hacker-controls{
+    display:flex;
+    gap:10px;
+  }
+
+  /* ---------- Chat ---------- */
+  .chat-modal{ width:min(94vw, 400px); }
+  .chat-login-fields{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .chat-input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:8px;
+    background:#03010a;
+    border:1px solid rgba(0,240,255,0.25);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    font-size:1rem;
+  }
+  .chat-input:focus{ outline:none; border-color:rgba(0,240,255,0.6); box-shadow:0 0 10px rgba(0,240,255,0.25); }
+  .chat-error{
+    color:var(--danger);
+    font-size:0.85rem;
+    min-height:1.2em;
+    text-align:center;
+  }
+  .chat-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    font-size:0.85rem;
+    color:var(--text-dim);
+  }
+  .chat-topbar strong{ color:var(--cyan); }
+  .chat-messages{
+    height:280px;
+    overflow-y:auto;
+    background:#03010a;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .chat-msg{
+    max-width:85%;
+    padding:8px 10px;
+    border-radius:8px;
+    background:var(--panel-2);
+    font-size:0.88rem;
+    line-height:1.35;
+    word-break:break-word;
+  }
+  .chat-msg.own{
+    align-self:flex-end;
+    background:rgba(0,240,255,0.14);
+    border:1px solid rgba(0,240,255,0.3);
+  }
+  .chat-msg .chat-name{
+    display:block;
+    font-weight:700;
+    font-size:0.75rem;
+    color:var(--magenta);
+    margin-bottom:2px;
+  }
+  .chat-msg.own .chat-name{ color:var(--cyan); }
+  .chat-msg .chat-time{
+    font-size:0.65rem;
+    color:var(--text-dim);
+    margin-left:6px;
+  }
+  .chat-input-row{
+    display:flex;
+    gap:8px;
+  }
+  .chat-input-row .chat-input{ flex:1; }
+  .chat-input-row .btn{ padding:0 18px; }
+
   /* ---------- Fruit Merge Legende ---------- */
   .fruit-legend-wrap{
     max-width:360px;
@@ -702,12 +828,14 @@
     <div class="buttons">
       <button class="btn primary" id="heroCalcBtn">🧮 Rechner öffnen</button>
       <button class="btn secondary" id="heroGameBtn">🎮 Spiele starten</button>
+      <button class="btn secondary" id="heroHackerBtn">💻 Hackertyper</button>
+      <button class="btn secondary" id="heroChatBtn">💬 Chat</button>
     </div>
   </section>
 
   <section class="section" id="tools">
     <h2>Was Recharger kann</h2>
-    <p class="section-intro">Zwei Werkzeuge, ein Interface — jederzeit erweiterbar.</p>
+    <p class="section-intro">Vier Werkzeuge, ein Interface — jederzeit erweiterbar.</p>
     <div class="cards">
       <article class="card" id="calcOpenBtn">
         <div class="icon">🧮</div>
@@ -718,13 +846,20 @@
       <article class="card" id="gameOpenBtn">
         <div class="icon">🎮</div>
         <h3>Arcade</h3>
-        <p>Snake, Stickman Fight, Tetris und Fruit Merge — wähl dein Spiel im Menü.</p>
+        <p>Snake, Stickman Fight, Tetris, Fruit Merge und War of Stickmen — wähl dein Spiel im Menü.</p>
         <span class="card-cta">Spiele anzeigen →</span>
       </article>
-      <article class="card">
-        <div class="icon">✨</div>
-        <h3>Mehr Projekte</h3>
-        <p>Neue Tools und Mini-Games lassen sich später einfach in dieses Grid einhängen.</p>
+      <article class="card" id="hackerOpenBtn">
+        <div class="icon">💻</div>
+        <h3>Hackertyper</h3>
+        <p>Tippe drauflos und lass täuschend echten "Hacker-Code" über den Bildschirm laufen.</p>
+        <span class="card-cta">Starten →</span>
+      </article>
+      <article class="card" id="chatOpenBtn">
+        <div class="icon">💬</div>
+        <h3>Chat</h3>
+        <p>Mit Name und Passwort anmelden und im browserlokalen Chat mitschreiben.</p>
+        <span class="card-cta">Anmelden →</span>
       </article>
     </div>
   </section>
@@ -752,27 +887,28 @@
     <div id="calcDisplay">0</div>
     <div class="calc-grid">
       <button class="clear" data-key="C">C</button>
+      <button class="clear" data-key="⌫">⌫</button>
       <button data-key="(">(</button>
       <button data-key=")">)</button>
-      <button class="op" data-key="/">÷</button>
 
       <button data-key="7">7</button>
       <button data-key="8">8</button>
       <button data-key="9">9</button>
-      <button class="op" data-key="*">×</button>
+      <button class="op" data-key="/">÷</button>
 
       <button data-key="4">4</button>
       <button data-key="5">5</button>
       <button data-key="6">6</button>
-      <button class="op" data-key="-">−</button>
+      <button class="op" data-key="*">×</button>
 
       <button data-key="1">1</button>
       <button data-key="2">2</button>
       <button data-key="3">3</button>
-      <button class="op" data-key="+">+</button>
+      <button class="op" data-key="-">−</button>
 
       <button class="zero" data-key="0">0</button>
       <button data-key=".">.</button>
+      <button class="op" data-key="+">+</button>
       <button class="eq" data-key="=">=</button>
     </div>
   </div>
@@ -789,6 +925,7 @@
       <button data-game="blast"><span class="g-icon">🧱</span> Tetris</button>
       <button data-game="merge"><span class="g-icon">🍉</span> Fruit Merge</button>
       <button data-game="war"><span class="g-icon">⚔️</span> War of Stickmen</button>
+      <button data-game="hacker"><span class="g-icon">💻</span> Hackertyper</button>
     </div>
   </div>
 </div>
@@ -801,6 +938,39 @@
       <button class="back-btn" id="backToMenuBtn">⟵ Menü</button>
     </div>
     <div id="gameArea"></div>
+  </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="overlay" id="chatModal">
+  <div class="modal chat-modal">
+    <button class="close-btn" data-close="chatModal">✕</button>
+    <h2>💬 Chat</h2>
+
+    <div id="chatLoginView">
+      <p class="hint" style="margin-bottom:10px;">
+        Melde dich mit Name und Passwort an. Wählst du einen neuen Namen, wird er
+        direkt für dich reserviert. Der Chat läuft lokal in diesem Browser.
+      </p>
+      <div class="chat-login-fields">
+        <input type="text" id="chatNameInput" class="chat-input" placeholder="Name" maxlength="20" autocomplete="off">
+        <input type="password" id="chatPassInput" class="chat-input" placeholder="Passwort" maxlength="40" autocomplete="off">
+        <button class="btn primary" id="chatLoginBtn" style="width:100%;">Anmelden</button>
+        <div class="chat-error" id="chatLoginError"></div>
+      </div>
+    </div>
+
+    <div id="chatMainView" style="display:none;">
+      <div class="chat-topbar">
+        <span>Angemeldet als <strong id="chatUserLabel"></strong></span>
+        <button class="back-btn" id="chatLogoutBtn">Abmelden</button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatMsgInput" class="chat-input" placeholder="Nachricht schreiben…" maxlength="300" autocomplete="off">
+        <button class="btn primary" id="chatSendBtn">Senden</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -925,6 +1095,13 @@ document.getElementById('gameOpenBtn').onclick = ()=>openModal('gameMenuModal');
 document.getElementById('heroCalcBtn').onclick = ()=>openModal('calcModal');
 document.getElementById('heroGameBtn').onclick = ()=>openModal('gameMenuModal');
 
+function openHackerDirect(){ openGame('hacker'); }
+document.getElementById('heroHackerBtn').onclick = openHackerDirect;
+document.getElementById('hackerOpenBtn').onclick = openHackerDirect;
+
+document.getElementById('heroChatBtn').onclick = ()=>{ openModal('chatModal'); initChatModal(); };
+document.getElementById('chatOpenBtn').onclick = ()=>{ openModal('chatModal'); initChatModal(); };
+
 document.querySelectorAll('[data-close]').forEach(btn=>{
   btn.onclick = ()=>closeModal(btn.dataset.close);
 });
@@ -939,30 +1116,56 @@ document.querySelectorAll('.overlay').forEach(ov=>{
 /* ---------------- Taschenrechner ---------------- */
 const display = document.getElementById('calcDisplay');
 let expr = '';
+let justEvaluated = false; // BUGFIX: nach "=" soll eine neue Zahl die Anzeige ersetzen, nicht anhängen
+
 document.querySelectorAll('.calc-grid button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const key = btn.dataset.key;
     if(key === 'C'){
       expr = '';
+      justEvaluated = false;
       display.textContent = '0';
+      return;
+    }
+    if(key === '⌫'){
+      expr = expr.slice(0, -1);
+      justEvaluated = false;
+      display.textContent = expr === '' ? '0' : expr;
       return;
     }
     if(key === '='){
       try{
         // Nur erlaubte Zeichen zulassen
-        if(/^[0-9+\-*/.() ]+$/.test(expr)){
+        if(expr !== '' && /^[0-9+\-*/.() ]+$/.test(expr)){
           const result = Function('"use strict";return (' + expr + ')')();
-          expr = String(result);
-          display.textContent = expr;
+          // BUGFIX: Division durch 0 / ungültige Ausdrücke ergaben "Infinity" oder "NaN" statt einer Fehlermeldung
+          if(!isFinite(result)){
+            display.textContent = 'Fehler';
+            expr = '';
+            justEvaluated = false;
+          } else {
+            expr = String(result);
+            display.textContent = expr;
+            justEvaluated = true;
+          }
         }else{
           display.textContent = 'Fehler';
           expr = '';
+          justEvaluated = false;
         }
       }catch(e){
         display.textContent = 'Fehler';
         expr = '';
+        justEvaluated = false;
       }
       return;
+    }
+    // BUGFIX: nach einem berechneten Ergebnis beginnt eine neue Zahl frisch,
+    // ein Operator rechnet dagegen mit dem vorherigen Ergebnis weiter
+    const isOperator = ['+','-','*','/'].includes(key);
+    if(justEvaluated){
+      if(!isOperator) expr = '';
+      justEvaluated = false;
     }
     expr += key;
     display.textContent = expr;
@@ -992,7 +1195,8 @@ const titles = {
   fight:'Stickman Fight',
   blast:'Tetris',
   merge:'Fruit Merge',
-  war:'War of Stickmen'
+  war:'War of Stickmen',
+  hacker:'Hackertyper'
 };
 
 function openGame(key){
@@ -1005,6 +1209,7 @@ function openGame(key){
   if(key==='blast') currentStop = initBlast(area);
   if(key==='merge') currentStop = initMerge(area);
   if(key==='war') currentStop = initWar(area);
+  if(key==='hacker') currentStop = initHacker(area);
 }
 
 /* =================================================================
@@ -1876,9 +2081,10 @@ function initWar(area){
 
       if(u.state === 'fight' && u.target){
         const d = distance(u,u.target);
+        const towardTarget = Math.sign(u.target.x - u.x) || dir(u); // BUGFIX: echte Zielrichtung statt fester Seiten-Richtung
         if(u.def.role==='melee'){
           if(d > u.def.range){
-            u.x += dir(u)*u.def.speed*dt; // sich nähern
+            u.x += towardTarget*u.def.speed*dt; // sich zum echten Ziel bewegen
           } else {
             u.atkCooldown -= dt;
             if(u.atkCooldown<=0){
@@ -1895,7 +2101,7 @@ function initWar(area){
               spawnProjectile(u, u.target);
             }
           } else {
-            u.x += dir(u)*u.def.speed*dt*0.6;
+            u.x += towardTarget*u.def.speed*dt*0.6;
           }
         }
         continue;
@@ -1905,11 +2111,14 @@ function initWar(area){
       const castleX = u.side==='player' ? enemyCastleX : playerCastleX;
       const reachedCastle = u.side==='player' ? u.x >= castleX-16 : u.x <= castleX+16;
       if(reachedCastle){
-        if(u.state !== 'attackCastle'){
-          // Warteschlangen-Versatz, damit Angreifer nicht exakt übereinander stehen
-          const aheadCount = units.filter(o=>o!==u && !o.dead && o.state==='attackCastle' && o.side===u.side).length;
+        if(!u.queued){
+          // BUGFIX: Warteschlangen-Position wird nur EINMAL beim ersten Erreichen
+          // der Burg vergeben, nicht bei jedem Wiedereintritt (sonst "springen"
+          // Einheiten nach jedem Scharmützel wieder ein Stück zurück).
+          const aheadCount = units.filter(o=>o!==u && !o.dead && o.queued && o.side===u.side).length;
           u.queueOffset = Math.min(aheadCount, 6) * 10;
           u.x = u.side==='player' ? castleX-16-u.queueOffset : castleX+16+u.queueOffset;
+          u.queued = true;
         }
         u.state = 'attackCastle';
         u.atkCooldown -= dt;
@@ -1919,8 +2128,7 @@ function initWar(area){
           else { playerCastleHP = Math.max(0, playerCastleHP-dmg); }
           u.atkCooldown = u.def.atkTime || 0.8;
         }
-        // BUGFIX: die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an,
-        // was das Spiel nach einiger Zeit zum Stocken bringt.
+        // Die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an.
         const castleCounter = 10 + level*1.2;
         u.hp -= castleCounter*dt;
         if(u.hp<=0 && !u.dead){ u.dead = true; }
@@ -2195,6 +2403,325 @@ function initWar(area){
   return function stop(){
     cancelAnimationFrame(rafId);
   };
+}
+
+/* =================================================================
+   HACKERTYPER — jeder Tastendruck zaubert "echten" Hacker-Code
+================================================================= */
+function initHacker(area){
+  area.innerHTML = `
+    <div class="hacker-wrap">
+      <div class="hint">Tippe einfach drauflos — jede Taste enthüllt mehr "Code" 💻</div>
+      <div class="hacker-term" id="hackerTerm" tabindex="0"><span class="cursor"></span></div>
+      <input id="hackerInput" class="hacker-hidden-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      <div class="hacker-controls">
+        <button class="back-btn" id="hackerResetBtn">🔄 Terminal leeren</button>
+      </div>
+    </div>
+  `;
+
+  const term = document.getElementById('hackerTerm');
+  const input = document.getElementById('hackerInput');
+
+  // Großer Fundus an fiktivem "Hacker-Code", der Zeichen für Zeichen enthüllt wird
+  const codePool = [
+`> INITIATING SECURE UPLINK...
+> bypassing firewall segment 0x4F2A
+function decryptPayload(buffer, key) {
+  const view = new DataView(buffer);
+  let out = [];
+  for (let i = 0; i < view.byteLength; i++) {
+    out.push(view.getUint8(i) ^ key[i % key.length]);
+  }
+  return new Uint8Array(out);
+}
+`,
+`> scanning subnet 10.0.0.0/8 ...
+[OK] host 10.0.0.14  ttl=64  port 22 open
+[OK] host 10.0.0.27  ttl=64  port 443 open
+root@target:~# sudo ./exploit --target=10.0.0.27 --payload=reverse_shell
+[+] connection established
+[+] privilege escalation: kernel exploit CVE-2024-XXXXX
+[+] root access granted
+`,
+`class NeuralCipher {
+  constructor(seed) { this.state = seed >>> 0; }
+  next() {
+    this.state ^= this.state << 13;
+    this.state ^= this.state >>> 17;
+    this.state ^= this.state << 5;
+    return this.state >>> 0;
+  }
+}
+const cipher = new NeuralCipher(0xC0FFEE);
+console.log('keystream:', Array.from({length:8}, ()=>cipher.next().toString(16)));
+`,
+`> mounting encrypted volume /dev/sdb1 ...
+Enter passphrase: ************************
+[OK] volume mounted at /mnt/vault
+drwxr-xr-x  root root  finance_records/
+drwxr-xr-x  root root  access_logs/
+-rw-------  root root  master_key.pem
+> tail -f access_logs/auth.log
+2026-09-19 03:14:02 accepted connection from 172.16.4.88
+2026-09-19 03:14:03 session token refreshed
+`,
+`SELECT id, username, token FROM sessions
+WHERE expires_at > NOW() AND revoked = 0;
+-- 4821 rows returned in 0.032s
+UPDATE sessions SET token = SHA2(CONCAT(token, salt), 256)
+WHERE id IN (SELECT id FROM sessions WHERE expires_at > NOW());
+-- rotating session tokens ...
+COMMIT;
+`,
+`import socket, threading
+
+def handle(conn):
+    data = conn.recv(4096)
+    print(f"[+] payload received: {len(data)} bytes")
+    conn.sendall(b"ACK")
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind(("0.0.0.0", 1337))
+server.listen(5)
+print("[*] listener active on port 1337")
+while True:
+    c, addr = server.accept()
+    threading.Thread(target=handle, args=(c,)).start()
+`,
+`> traceroute 203.0.113.42
+1  10.0.0.1        0.412 ms
+2  172.16.254.1    3.117 ms
+3  203.0.113.1     14.882 ms
+4  203.0.113.42    22.045 ms
+> nmap -sV -p- 203.0.113.42
+PORT     STATE SERVICE     VERSION
+22/tcp   open  ssh         OpenSSH 9.1
+443/tcp  open  https       nginx 1.25.3
+8080/tcp open  http-proxy  squid 5.7
+`
+  ];
+
+  let poolIndex = 0;
+  let charIndex = 0;
+  let buffer = '';
+
+  function nextChunk(){
+    const chunkLen = 3 + Math.floor(Math.random()*5); // 3-7 Zeichen pro Tastendruck
+    let block = codePool[poolIndex];
+    let out = '';
+    for(let i=0;i<chunkLen;i++){
+      if(charIndex >= block.length){
+        poolIndex = (poolIndex+1) % codePool.length;
+        block = codePool[poolIndex];
+        charIndex = 0;
+        out += '\n';
+      }
+      out += block[charIndex];
+      charIndex++;
+    }
+    return out;
+  }
+
+  function renderTerm(){
+    term.innerHTML = escapeHtml(buffer) + '<span class="cursor"></span>';
+    term.scrollTop = term.scrollHeight;
+  }
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function onType(){
+    buffer += nextChunk();
+    // Terminal nicht endlos wachsen lassen (Performance)
+    if(buffer.length > 6000) buffer = buffer.slice(buffer.length-4000);
+    renderTerm();
+    input.value = '';
+  }
+
+  function focusInput(){ input.focus(); }
+  term.addEventListener('click', focusInput);
+  input.addEventListener('input', onType);
+  input.addEventListener('keydown', e=>{
+    // Auch reine Steuertasten (Leertaste, Enter, Pfeile) sollen Code enthüllen
+    if(e.key.length===1 || e.key==='Enter' || e.key===' '){
+      onType();
+      e.preventDefault();
+    }
+  });
+
+  const resetBtn = document.getElementById('hackerResetBtn');
+  function resetTerm(){
+    buffer = '';
+    poolIndex = Math.floor(Math.random()*codePool.length);
+    charIndex = 0;
+    renderTerm();
+    focusInput();
+  }
+  resetBtn.addEventListener('click', resetTerm);
+
+  renderTerm();
+  // Auf Desktop direkt fokussieren; auf Mobile erst bei Tap (siehe term-Klick)
+  setTimeout(focusInput, 50);
+
+  return function stop(){
+    term.removeEventListener('click', focusInput);
+    resetBtn.removeEventListener('click', resetTerm);
+  };
+}
+
+/* =================================================================
+   CHAT — Login mit Name/Passwort + browserlokaler Chat
+   Hinweis: Da Recharger eine statische GitHub-Pages-Seite ohne
+   eigenen Server ist, werden Konten und Nachrichten im localStorage
+   dieses Browsers gespeichert (nicht serverseitig, nicht verschlüsselt).
+   Mehrere Tabs im selben Browser können sich so gegenseitig sehen.
+================================================================= */
+const CHAT_USERS_KEY = 'recharger_chat_users';
+const CHAT_MSGS_KEY = 'recharger_chat_messages';
+const CHAT_SESSION_KEY = 'recharger_chat_session';
+let chatModalInited = false;
+let chatStorageListener = null;
+
+function chatGetUsers(){
+  try{ return JSON.parse(localStorage.getItem(CHAT_USERS_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function chatSaveUsers(users){
+  try{ localStorage.setItem(CHAT_USERS_KEY, JSON.stringify(users)); }catch(e){}
+}
+function chatGetMessages(){
+  try{ return JSON.parse(localStorage.getItem(CHAT_MSGS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function chatSaveMessages(msgs){
+  // Nachrichtenverlauf begrenzen, damit localStorage nicht endlos wächst
+  const trimmed = msgs.slice(-150);
+  try{ localStorage.setItem(CHAT_MSGS_KEY, JSON.stringify(trimmed)); }catch(e){}
+}
+function chatGetSession(){
+  try{ return localStorage.getItem(CHAT_SESSION_KEY) || ''; }catch(e){ return ''; }
+}
+function chatSetSession(name){
+  try{
+    if(name) localStorage.setItem(CHAT_SESSION_KEY, name);
+    else localStorage.removeItem(CHAT_SESSION_KEY);
+  }catch(e){}
+}
+// Sehr einfacher, nicht-kryptographischer Hash — ausreichend für dieses
+// lokale Demo-Login, ersetzt keine echte Passwort-Sicherheit.
+function chatSimpleHash(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return h.toString(36);
+}
+
+function initChatModal(){
+  const loginView = document.getElementById('chatLoginView');
+  const mainView = document.getElementById('chatMainView');
+  const nameInput = document.getElementById('chatNameInput');
+  const passInput = document.getElementById('chatPassInput');
+  const loginBtn = document.getElementById('chatLoginBtn');
+  const loginError = document.getElementById('chatLoginError');
+  const logoutBtn = document.getElementById('chatLogoutBtn');
+  const userLabel = document.getElementById('chatUserLabel');
+  const msgList = document.getElementById('chatMessages');
+  const msgInput = document.getElementById('chatMsgInput');
+  const sendBtn = document.getElementById('chatSendBtn');
+
+  function showLogin(){
+    loginView.style.display = '';
+    mainView.style.display = 'none';
+    loginError.textContent = '';
+    setTimeout(()=>nameInput.focus(), 30);
+  }
+  function showChat(name){
+    loginView.style.display = 'none';
+    mainView.style.display = '';
+    userLabel.textContent = name;
+    renderMessages();
+    setTimeout(()=>msgInput.focus(), 30);
+  }
+
+  function renderMessages(){
+    const me = chatGetSession();
+    const msgs = chatGetMessages();
+    msgList.innerHTML = msgs.map(m=>{
+      const own = m.name===me;
+      const time = new Date(m.time).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+      return `<div class="chat-msg ${own?'own':''}">
+        <span class="chat-name">${escapeHtmlChat(m.name)}<span class="chat-time">${time}</span></span>
+        ${escapeHtmlChat(m.text)}
+      </div>`;
+    }).join('');
+    msgList.scrollTop = msgList.scrollHeight;
+  }
+  function escapeHtmlChat(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function doLogin(){
+    const name = nameInput.value.trim();
+    const pass = passInput.value;
+    loginError.textContent = '';
+    if(!name || !pass){
+      loginError.textContent = 'Bitte Name und Passwort eingeben.';
+      return;
+    }
+    const users = chatGetUsers();
+    const hash = chatSimpleHash(pass);
+    if(users[name]){
+      if(users[name] !== hash){
+        loginError.textContent = 'Falsches Passwort für diesen Namen.';
+        return;
+      }
+    } else {
+      // Neuer Name -> Konto wird direkt angelegt
+      users[name] = hash;
+      chatSaveUsers(users);
+    }
+    chatSetSession(name);
+    passInput.value = '';
+    showChat(name);
+  }
+
+  function doLogout(){
+    chatSetSession('');
+    showLogin();
+  }
+
+  function doSend(){
+    const name = chatGetSession();
+    if(!name) return;
+    const text = msgInput.value.trim();
+    if(!text) return;
+    const msgs = chatGetMessages();
+    msgs.push({ name, text, time: Date.now() });
+    chatSaveMessages(msgs);
+    msgInput.value = '';
+    renderMessages();
+  }
+
+  loginBtn.onclick = doLogin;
+  passInput.onkeydown = e=>{ if(e.key==='Enter') doLogin(); };
+  nameInput.onkeydown = e=>{ if(e.key==='Enter') passInput.focus(); };
+  logoutBtn.onclick = doLogout;
+  sendBtn.onclick = doSend;
+  msgInput.onkeydown = e=>{ if(e.key==='Enter') doSend(); };
+
+  // Nachrichten aus anderen Tabs live übernehmen
+  if(chatStorageListener) window.removeEventListener('storage', chatStorageListener);
+  chatStorageListener = e=>{
+    if(e.key===CHAT_MSGS_KEY && mainView.style.display !== 'none'){ renderMessages(); }
+  };
+  window.addEventListener('storage', chatStorageListener);
+
+  const session = chatGetSession();
+  if(session && chatGetUsers()[session]){
+    showChat(session);
+  } else {
+    showLogin();
+  }
 }
 </script>
 
