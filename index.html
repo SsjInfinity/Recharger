@@ -327,7 +327,7 @@
   }
 
   /* ---------- Calculator ---------- */
-  #calcModal .modal{width:300px;}
+  #calcModal .modal{width:min(94vw,300px);}
   #calcDisplay{
     background:#03010a;
     border:1px solid rgba(0,240,255,0.25);
@@ -1087,6 +1087,91 @@
   .gameover-overlay .go-secondary:hover{ background:rgba(255,43,214,0.15); }
   .fruit-legend .step img{ width:26px; height:26px; }
 
+
+  /* ---------- Taschenrechner: Modi, Einheiten, Formeln ---------- */
+  #calcBox{ max-height:94vh; overflow-y:auto; }
+  #calcBox.wide{ width:min(94vw, 360px); }
+  .calc-tabs{ display:flex; gap:4px; margin-bottom:10px; }
+  .calc-tab{
+    flex:1;
+    padding:7px 2px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text-dim);
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+  .calc-tab.active{ color:var(--cyan); border-color:rgba(0,240,255,0.5); background:rgba(0,240,255,0.1); }
+  .calc-sci{ margin-bottom:8px; }
+  .calc-sci button{ padding:11px 0 !important; font-size:0.95rem !important; }
+  #calcDisplay.small{ font-size:1.25rem; }
+  #calcDisplay.tiny{ font-size:0.95rem; }
+  .calc-panel{ display:flex; flex-direction:column; gap:10px; }
+  .calc-panel .chat-input{ padding:10px 12px; font-size:0.95rem; }
+  .calc-row{ display:flex; gap:8px; }
+  .calc-row input{ flex:1.2; min-width:0; }
+  .calc-row select{ flex:1; min-width:0; }
+  .calc-swap{ align-self:center; padding:5px 14px; }
+  .calc-form-inputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .calc-form-inputs label{ display:flex; flex-direction:column; gap:3px; font-size:0.78rem; color:var(--text-dim); }
+  .calc-form-outputs{ display:flex; flex-direction:column; gap:6px; }
+  .calc-out{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:9px 12px;
+    border-radius:8px;
+    background:#03010a;
+    border:1px solid rgba(0,240,255,0.25);
+    font-size:0.88rem;
+  }
+  .calc-out .calc-out-label{ color:var(--text-dim); }
+  .calc-out .calc-out-val{ font-family:'Orbitron',sans-serif; color:var(--cyan); font-size:0.82rem; text-align:right; }
+  .calc-out .back-btn{ padding:3px 8px; font-size:0.75rem; }
+
+
+  /* ---------- War of Stickmen: Befehle, Superkrieger, Türme ---------- */
+  .war-stance{ display:flex; gap:6px; width:100%; }
+  .war-stance button{
+    flex:1;
+    padding:8px 4px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:0.8rem;
+    line-height:1.15;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .war-stance button:hover{ background:#241448; }
+  .war-stance button.active{
+    border-color:var(--magenta);
+    background:rgba(255,43,214,0.16);
+    box-shadow:0 0 12px rgba(255,43,214,0.35);
+  }
+  .war-unit-btn.war-super{
+    grid-column:1 / -1;
+    flex-direction:row;
+    justify-content:center;
+    gap:10px;
+    padding:10px 6px;
+    border-color:rgba(223,232,255,0.6);
+    background:linear-gradient(90deg, rgba(223,232,255,0.1), rgba(160,185,255,0.18), rgba(223,232,255,0.1));
+    box-shadow:0 0 14px rgba(200,220,255,0.18);
+  }
+  .war-unit-btn.war-super .u-cost{ color:#dfe8ff; }
+  .war-extra{ display:flex; flex-direction:column; gap:6px; width:100%; }
+  .war-extra .war-unit-btn.war-wide{ flex:none; width:100%; flex-direction:row; justify-content:center; gap:8px; padding:9px 6px; }
+  .war-towers{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%; }
+  .war-towers .war-unit-btn{ flex:none; flex-direction:column; gap:2px; padding:8px 4px; }
+
 </style>
 </head>
 <body>
@@ -1175,11 +1260,45 @@
 
 <!-- Calculator Modal -->
 <div class="overlay" id="calcModal">
-  <div class="modal">
+  <div class="modal" id="calcBox">
     <button class="close-btn" data-close="calcModal">✕</button>
     <h2>Taschenrechner</h2>
+    <div class="calc-tabs" id="calcTabs">
+      <button class="calc-tab active" data-mode="std">Standard</button>
+      <button class="calc-tab" data-mode="sci">Wissenschaft</button>
+      <button class="calc-tab" data-mode="unit">Einheiten</button>
+      <button class="calc-tab" data-mode="form">Formeln</button>
+    </div>
     <div id="calcDisplay">0</div>
-    <div class="calc-grid">
+
+    <div class="calc-grid calc-sci" id="calcSci" style="display:none;">
+      <button data-key="sin(">sin</button>
+      <button data-key="cos(">cos</button>
+      <button data-key="tan(">tan</button>
+      <button class="op" data-key="MODE" id="calcModeKey" title="Winkelmodus umschalten">DEG</button>
+
+      <button data-key="asin(">sin⁻¹</button>
+      <button data-key="acos(">cos⁻¹</button>
+      <button data-key="atan(">tan⁻¹</button>
+      <button class="op" data-key="Ans">Ans</button>
+
+      <button data-key="ln(">ln</button>
+      <button data-key="log(">log</button>
+      <button data-key="sqrt(">√</button>
+      <button data-key="^2">x²</button>
+
+      <button data-key="^">xʸ</button>
+      <button data-key="π">π</button>
+      <button data-key="e">e</button>
+      <button data-key="!">n!</button>
+
+      <button data-key="%">%</button>
+      <button data-key="exp(">eˣ</button>
+      <button data-key="abs(">|x|</button>
+      <button data-key="10^">10ˣ</button>
+    </div>
+
+    <div class="calc-grid" id="calcStdGrid">
       <button class="clear" data-key="C">C</button>
       <button class="clear" data-key="⌫">⌫</button>
       <button data-key="(">(</button>
@@ -1204,6 +1323,28 @@
       <button data-key=".">.</button>
       <button class="op" data-key="+">+</button>
       <button class="eq" data-key="=">=</button>
+    </div>
+
+    <!-- Einheiten-Umrechnung -->
+    <div class="calc-panel" id="calcUnit" style="display:none;">
+      <select id="uCat" class="chat-input"></select>
+      <div class="calc-row">
+        <input id="uFrom" class="chat-input" type="text" inputmode="decimal" placeholder="Wert" autocomplete="off">
+        <select id="uFromUnit" class="chat-input"></select>
+      </div>
+      <button class="back-btn calc-swap" id="uSwap" title="Einheiten tauschen">⇅ tauschen</button>
+      <div class="calc-row">
+        <input id="uTo" class="chat-input" type="text" readonly placeholder="Ergebnis">
+        <select id="uToUnit" class="chat-input"></select>
+      </div>
+      <button class="btn primary" id="uApply" style="width:100%;">Ergebnis in den Rechner übernehmen</button>
+    </div>
+
+    <!-- Formelsammlung -->
+    <div class="calc-panel" id="calcForm" style="display:none;">
+      <select id="fSelect" class="chat-input"></select>
+      <div id="fInputs" class="calc-form-inputs"></div>
+      <div id="fOutputs" class="calc-form-outputs"></div>
     </div>
   </div>
 </div>
@@ -1681,64 +1822,340 @@ document.querySelectorAll('.overlay').forEach(ov=>{
   });
 });
 
-/* ---------------- Taschenrechner ---------------- */
+/* ---------------- Taschenrechner (Standard / Wissenschaft / Einheiten / Formeln) ---------------- */
 const display = document.getElementById('calcDisplay');
 let expr = '';
-let justEvaluated = false; // BUGFIX: nach "=" soll eine neue Zahl die Anzeige ersetzen, nicht anhängen
+let justEvaluated = false;   // nach "=" ersetzt eine neue Zahl die Anzeige, ein Operator rechnet weiter
+let degMode = true;          // Winkelmodus: Grad (DEG) oder Bogenmaß (RAD)
+let lastAns = 0;
+let calcMode = 'std';
+let calcMainMode = 'std';    // Rechner-Modus, zu dem "Ergebnis übernehmen" zurückkehrt
+
+/* ---- sicherer Formel-Parser (kein eval) ---- */
+function calcFact(n){
+  if(!Number.isInteger(n) || n < 0 || n > 170) throw new Error('Fakultät');
+  let r = 1; for(let i=2;i<=n;i++) r *= i; return r;
+}
+const calcToRad = (x,c)=> c.deg ? x*Math.PI/180 : x;
+const calcFromRad = (x,c)=> c.deg ? x*180/Math.PI : x;
+const CALC_FUNCS = {
+  sin:(x,c)=>Math.sin(calcToRad(x,c)),
+  cos:(x,c)=>Math.cos(calcToRad(x,c)),
+  tan:(x,c)=>{
+    if(c.deg && Math.abs((((x % 180) + 180) % 180) - 90) < 1e-9) throw new Error('tan');
+    return Math.tan(calcToRad(x,c));
+  },
+  asin:(x,c)=>calcFromRad(Math.asin(x),c),
+  acos:(x,c)=>calcFromRad(Math.acos(x),c),
+  atan:(x,c)=>calcFromRad(Math.atan(x),c),
+  sinh:Math.sinh, cosh:Math.cosh, tanh:Math.tanh,
+  ln:Math.log, log:Math.log10, sqrt:Math.sqrt, cbrt:Math.cbrt, abs:Math.abs, exp:Math.exp
+};
+function calcTokenize(src){
+  const s = src.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/√/g,'sqrt');
+  const tokens = []; let i = 0;
+  while(i < s.length){
+    const rest = s.slice(i);
+    if(/^\s/.test(rest)){ i++; continue; }
+    let m = /^(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?/.exec(rest);
+    if(m){ tokens.push({t:'num', v:parseFloat(m[0])}); i += m[0].length; continue; }
+    m = /^[a-zA-Zπ]+/.exec(rest);
+    if(m){ tokens.push({t:'id', v:m[0].toLowerCase()}); i += m[0].length; continue; }
+    if('+-*/^()!%'.includes(s[i])){ tokens.push({t:'op', v:s[i]}); i++; continue; }
+    throw new Error('Zeichen');
+  }
+  return tokens;
+}
+function calcParse(tokens, ctx){
+  let p = 0;
+  const peek = ()=>tokens[p];
+  const isOp = v=>peek() && peek().t==='op' && peek().v===v;
+  function closeParen(){
+    if(isOp(')')){ p++; return; }
+    if(p >= tokens.length) return;              // fehlende ")" am Ende wird automatisch ergänzt
+    throw new Error(')');
+  }
+  function expression(){
+    let v = term();
+    while(isOp('+') || isOp('-')){ const o = tokens[p++].v; const r = term(); v = o==='+' ? v+r : v-r; }
+    return v;
+  }
+  function term(){
+    let v = unary();
+    for(;;){
+      if(isOp('*') || isOp('/')){ const o = tokens[p++].v; const r = unary(); v = o==='*' ? v*r : v/r; }
+      else if(peek() && (peek().t==='id' || isOp('('))){ v = v * unary(); }   // 2π, 3(4+1), 2sin(30)
+      else break;
+    }
+    return v;
+  }
+  function unary(){
+    if(isOp('-')){ p++; return -unary(); }
+    if(isOp('+')){ p++; return unary(); }
+    return power();
+  }
+  function power(){
+    const b = postfix();
+    if(isOp('^')){ p++; return Math.pow(b, unary()); }   // rechtsassoziativ
+    return b;
+  }
+  function postfix(){
+    let v = primary();
+    while(isOp('!') || isOp('%')){
+      const o = tokens[p++].v;
+      v = o==='!' ? calcFact(v) : v/100;
+    }
+    return v;
+  }
+  function primary(){
+    const t = tokens[p++];
+    if(!t) throw new Error('Ende');
+    if(t.t==='num') return t.v;
+    if(t.t==='op' && t.v==='('){ const v = expression(); closeParen(); return v; }
+    if(t.t==='id'){
+      if(t.v==='pi' || t.v==='π') return Math.PI;
+      if(t.v==='e') return Math.E;
+      if(t.v==='ans') return ctx.ans;
+      const f = CALC_FUNCS[t.v];
+      if(!f) throw new Error('Funktion');
+      if(!isOp('(')) throw new Error('(');
+      p++;
+      const a = expression(); closeParen();
+      return f(a, ctx);
+    }
+    throw new Error('Syntax');
+  }
+  const v = expression();
+  if(p < tokens.length) throw new Error('Rest');
+  return v;
+}
+function calcEvaluate(src){
+  const v = calcParse(calcTokenize(src), { deg: degMode, ans: lastAns });
+  if(!isFinite(v)) throw new Error('Ergebnis');
+  return parseFloat(v.toPrecision(12));       // 0.1+0.2 -> 0.3, sin(30°) -> 0.5
+}
+
+/* ---- Anzeige ---- */
+function prettyExpr(e){
+  return e.replace(/\*/g,'×').replace(/\//g,'÷').replace(/sqrt\(/g,'√(');
+}
+function calcShow(text){
+  const t = text === undefined ? (expr === '' ? '0' : prettyExpr(expr)) : text;
+  display.textContent = t;
+  display.classList.toggle('small', t.length > 11 && t.length <= 18);
+  display.classList.toggle('tiny', t.length > 18);
+  display.scrollLeft = display.scrollWidth;
+}
+function calcError(){ expr = ''; justEvaluated = false; calcShow('Fehler'); }
 
 document.querySelectorAll('.calc-grid button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const key = btn.dataset.key;
-    if(key === 'C'){
-      expr = '';
+    if(key === 'C'){ expr = ''; justEvaluated = false; calcShow('0'); return; }
+    if(key === '⌫'){
+      // ganze Funktionsnamen wie "sin(" auf einmal löschen
+      const fn = /(asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|ln|log|sqrt|cbrt|abs|exp)\($/.exec(expr);
+      expr = fn ? expr.slice(0, -fn[0].length) : expr.slice(0, -1);
       justEvaluated = false;
-      display.textContent = '0';
+      calcShow();
       return;
     }
-    if(key === '⌫'){
-      expr = expr.slice(0, -1);
-      justEvaluated = false;
-      display.textContent = expr === '' ? '0' : expr;
+    if(key === 'MODE'){
+      degMode = !degMode;
+      document.getElementById('calcModeKey').textContent = degMode ? 'DEG' : 'RAD';
       return;
     }
     if(key === '='){
+      if(expr === ''){ return; }
       try{
-        // Nur erlaubte Zeichen zulassen
-        if(expr !== '' && /^[0-9+\-*/.() ]+$/.test(expr)){
-          const result = Function('"use strict";return (' + expr + ')')();
-          // BUGFIX: Division durch 0 / ungültige Ausdrücke ergaben "Infinity" oder "NaN" statt einer Fehlermeldung
-          if(!isFinite(result)){
-            display.textContent = 'Fehler';
-            expr = '';
-            justEvaluated = false;
-          } else {
-            expr = String(result);
-            display.textContent = expr;
-            justEvaluated = true;
-          }
-        }else{
-          display.textContent = 'Fehler';
-          expr = '';
-          justEvaluated = false;
-        }
+        const result = calcEvaluate(expr);
+        lastAns = result;
+        expr = String(result);
+        calcShow(expr);
+        justEvaluated = true;
       }catch(e){
-        display.textContent = 'Fehler';
-        expr = '';
-        justEvaluated = false;
+        calcError();
       }
       return;
     }
-    // BUGFIX: nach einem berechneten Ergebnis beginnt eine neue Zahl frisch,
-    // ein Operator rechnet dagegen mit dem vorherigen Ergebnis weiter
-    const isOperator = ['+','-','*','/'].includes(key);
+    // nach einem Ergebnis: Operatoren rechnen weiter, alles andere beginnt neu
+    const continuesResult = ['+','-','*','/','^','!','%','^2'].includes(key);
     if(justEvaluated){
-      if(!isOperator) expr = '';
+      if(!continuesResult) expr = '';
       justEvaluated = false;
     }
-    expr += key;
-    display.textContent = expr;
+    let insert = key;
+    if(key === 'e' && /[\d.)!%]$/.test(expr)) insert = '*e';   // 2e  ->  2·e
+    expr += insert;
+    calcShow();
   });
 });
+
+/* ---- Modus-Umschaltung ---- */
+function setCalcMode(mode){
+  calcMode = mode;
+  if(mode === 'std' || mode === 'sci') calcMainMode = mode;
+  document.querySelectorAll('#calcTabs .calc-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode === mode));
+  const main = mode === 'std' || mode === 'sci';
+  display.style.display = main ? '' : 'none';
+  document.getElementById('calcStdGrid').style.display = main ? '' : 'none';
+  document.getElementById('calcSci').style.display = mode === 'sci' ? '' : 'none';
+  document.getElementById('calcUnit').style.display = mode === 'unit' ? '' : 'none';
+  document.getElementById('calcForm').style.display = mode === 'form' ? '' : 'none';
+  document.getElementById('calcBox').classList.toggle('wide', mode !== 'std');
+  if(mode === 'unit') unitPrefillFromDisplay();
+}
+document.querySelectorAll('#calcTabs .calc-tab').forEach(t=>{
+  t.onclick = ()=>setCalcMode(t.dataset.mode);
+});
+function calcUseValue(v){            // Wert in den Rechner übernehmen
+  expr = String(parseFloat(Number(v).toPrecision(12)));
+  justEvaluated = true;
+  setCalcMode(calcMainMode);
+  calcShow(expr);
+}
+
+/* ---- Einheiten ---- */
+const UNIT_CATS = {
+  'Länge':           { def:['m','km'],  u:{ 'mm':0.001, 'cm':0.01, 'dm':0.1, 'm':1, 'km':1000, 'Zoll (in)':0.0254, 'Fuß (ft)':0.3048, 'Yard (yd)':0.9144, 'Meile (mi)':1609.344, 'Seemeile (sm)':1852 } },
+  'Masse':           { def:['kg','g'],  u:{ 'mg':1e-6, 'g':0.001, 'kg':1, 't':1000, 'Unze (oz)':0.028349523125, 'Pfund (lb)':0.45359237 } },
+  'Zeit':            { def:['h','min'], u:{ 'ms':0.001, 's':1, 'min':60, 'h':3600, 'Tag':86400, 'Woche':604800, 'Jahr (365 d)':31536000 } },
+  'Temperatur':      { def:['°C','°F'], u:{ '°C':1, '°F':1, 'K':1 } },
+  'Fläche':          { def:['m²','ha'], u:{ 'mm²':1e-6, 'cm²':1e-4, 'm²':1, 'ha':1e4, 'km²':1e6, 'ft²':0.09290304, 'Acre':4046.8564224 } },
+  'Volumen':         { def:['l','ml'],  u:{ 'ml':0.001, 'cl':0.01, 'l':1, 'm³':1000, 'US-Gallone':3.785411784, 'fl oz (US)':0.0295735295625 } },
+  'Geschwindigkeit': { def:['km/h','m/s'], u:{ 'm/s':1, 'km/h':1/3.6, 'mph':0.44704, 'Knoten (kn)':1852/3600 } },
+  'Energie':         { def:['kWh','kJ'], u:{ 'J':1, 'kJ':1000, 'kcal':4184, 'Wh':3600, 'kWh':3.6e6 } },
+  'Leistung':        { def:['kW','PS (metrisch)'], u:{ 'W':1, 'kW':1000, 'PS (metrisch)':735.49875, 'hp':745.69987158227 } },
+  'Druck':           { def:['bar','Pa'], u:{ 'Pa':1, 'hPa':100, 'kPa':1000, 'bar':1e5, 'atm':101325, 'psi':6894.757293168 } },
+  'Daten':           { def:['MB','KB'], u:{ 'Bit':0.125, 'Byte':1, 'KB':1000, 'MB':1e6, 'GB':1e9, 'TB':1e12, 'KiB':1024, 'MiB':1048576, 'GiB':1073741824 } }
+};
+function convertUnit(cat, v, from, to){
+  if(cat === 'Temperatur'){
+    const toK = { '°C':x=>x+273.15, '°F':x=>(x-32)*5/9+273.15, 'K':x=>x };
+    const fromK = { '°C':k=>k-273.15, '°F':k=>(k-273.15)*9/5+32, 'K':k=>k };
+    return fromK[to](toK[from](v));
+  }
+  const u = UNIT_CATS[cat].u;
+  return v * u[from] / u[to];
+}
+function parseNum(s){
+  const n = parseFloat(String(s).trim().replace(',', '.'));
+  return isFinite(n) ? n : NaN;
+}
+const uCat = document.getElementById('uCat');
+const uFrom = document.getElementById('uFrom');
+const uTo = document.getElementById('uTo');
+const uFromUnit = document.getElementById('uFromUnit');
+const uToUnit = document.getElementById('uToUnit');
+function fillUnitSelects(){
+  const cat = UNIT_CATS[uCat.value];
+  const names = Object.keys(cat.u);
+  const opts = names.map(n=>`<option value="${escapeHtmlGlobal(n)}">${escapeHtmlGlobal(n)}</option>`).join('');
+  uFromUnit.innerHTML = opts; uToUnit.innerHTML = opts;
+  uFromUnit.value = cat.def[0]; uToUnit.value = cat.def[1];
+  runUnitConvert();
+}
+function runUnitConvert(){
+  const v = parseNum(uFrom.value);
+  if(isNaN(v)){ uTo.value = ''; return; }
+  const r = convertUnit(uCat.value, v, uFromUnit.value, uToUnit.value);
+  uTo.value = String(parseFloat(r.toPrecision(10)));
+}
+function unitPrefillFromDisplay(){
+  if(expr === '') return;
+  try{ uFrom.value = String(calcEvaluate(expr)); runUnitConvert(); }catch(e){}
+}
+uCat.innerHTML = Object.keys(UNIT_CATS).map(c=>`<option>${c}</option>`).join('');
+uCat.onchange = fillUnitSelects;
+uFrom.oninput = runUnitConvert;
+uFromUnit.onchange = runUnitConvert;
+uToUnit.onchange = runUnitConvert;
+document.getElementById('uSwap').onclick = ()=>{
+  const a = uFromUnit.value; uFromUnit.value = uToUnit.value; uToUnit.value = a;
+  runUnitConvert();
+};
+document.getElementById('uApply').onclick = ()=>{
+  const v = parseNum(uTo.value);
+  if(!isNaN(v)) calcUseValue(v);
+};
+fillUnitSelects();
+
+/* ---- Formeln ---- */
+const G_ERDE = 9.81;
+const CALC_FORMULAS = [
+  { name:'Kreis (Fläche & Umfang)', inputs:[{id:'r', label:'Radius r', unit:'m'}],
+    outputs:[{label:'Fläche A = π·r²', unit:'m²', f:v=>Math.PI*v.r**2}, {label:'Umfang U = 2·π·r', unit:'m', f:v=>2*Math.PI*v.r}] },
+  { name:'Kugel (Volumen & Oberfläche)', inputs:[{id:'r', label:'Radius r', unit:'m'}],
+    outputs:[{label:'Volumen V = 4/3·π·r³', unit:'m³', f:v=>4/3*Math.PI*v.r**3}, {label:'Oberfläche A = 4·π·r²', unit:'m²', f:v=>4*Math.PI*v.r**2}] },
+  { name:'Satz des Pythagoras', inputs:[{id:'a', label:'Kathete a', unit:'m'}, {id:'b', label:'Kathete b', unit:'m'}],
+    outputs:[{label:'Hypotenuse c = √(a²+b²)', unit:'m', f:v=>Math.sqrt(v.a**2 + v.b**2)}] },
+  { name:'Quadratische Gleichung (ax²+bx+c=0)', inputs:[{id:'a', label:'a', unit:''}, {id:'b', label:'b', unit:''}, {id:'c', label:'c', unit:''}],
+    outputs:[
+      {label:'Diskriminante D = b²−4ac', unit:'', f:v=>v.b**2 - 4*v.a*v.c},
+      {label:'x₁ = (−b+√D)/2a', unit:'', f:v=>{ if(v.a===0) return 'a darf nicht 0 sein'; const d=v.b**2-4*v.a*v.c; return d<0 ? 'keine reelle Lösung' : (-v.b+Math.sqrt(d))/(2*v.a); }},
+      {label:'x₂ = (−b−√D)/2a', unit:'', f:v=>{ if(v.a===0) return 'a darf nicht 0 sein'; const d=v.b**2-4*v.a*v.c; return d<0 ? 'keine reelle Lösung' : (-v.b-Math.sqrt(d))/(2*v.a); }}
+    ] },
+  { name:'Geschwindigkeit v = s / t', inputs:[{id:'s', label:'Strecke s', unit:'m'}, {id:'t', label:'Zeit t', unit:'s'}],
+    outputs:[{label:'v in m/s', unit:'m/s', f:v=>v.s/v.t}, {label:'v in km/h', unit:'km/h', f:v=>v.s/v.t*3.6}] },
+  { name:'Ohmsches Gesetz', inputs:[{id:'U', label:'Spannung U', unit:'V'}, {id:'R', label:'Widerstand R', unit:'Ω'}],
+    outputs:[{label:'Strom I = U/R', unit:'A', f:v=>v.U/v.R}, {label:'Leistung P = U²/R', unit:'W', f:v=>v.U**2/v.R}] },
+  { name:'Kinetische Energie', inputs:[{id:'m', label:'Masse m', unit:'kg'}, {id:'v', label:'Geschwindigkeit v', unit:'m/s'}],
+    outputs:[{label:'E = ½·m·v²', unit:'J', f:v=>0.5*v.m*v.v**2}] },
+  { name:'Lageenergie', inputs:[{id:'m', label:'Masse m', unit:'kg'}, {id:'h', label:'Höhe h', unit:'m'}],
+    outputs:[{label:`E = m·g·h (g = ${G_ERDE})`, unit:'J', f:v=>v.m*G_ERDE*v.h}] },
+  { name:'Freier Fall', inputs:[{id:'t', label:'Fallzeit t', unit:'s'}],
+    outputs:[{label:'Fallhöhe s = ½·g·t²', unit:'m', f:v=>0.5*G_ERDE*v.t**2}, {label:'Geschwindigkeit v = g·t', unit:'m/s', f:v=>G_ERDE*v.t}] },
+  { name:'Dichte ρ = m / V', inputs:[{id:'m', label:'Masse m', unit:'kg'}, {id:'V', label:'Volumen V', unit:'m³'}],
+    outputs:[{label:'Dichte ρ', unit:'kg/m³', f:v=>v.m/v.V}] },
+  { name:'Prozentrechnung', inputs:[{id:'G', label:'Grundwert G', unit:''}, {id:'p', label:'Prozentsatz p', unit:'%'}],
+    outputs:[{label:'Prozentwert W = G·p/100', unit:'', f:v=>v.G*v.p/100}] },
+  { name:'Zinseszins', inputs:[{id:'K', label:'Startkapital K₀', unit:'€'}, {id:'p', label:'Zinssatz p', unit:'%'}, {id:'n', label:'Jahre n', unit:''}],
+    outputs:[{label:'Endkapital Kₙ = K₀·(1+p/100)ⁿ', unit:'€', f:v=>v.K*Math.pow(1+v.p/100, v.n)}, {label:'Zinsen', unit:'€', f:v=>v.K*Math.pow(1+v.p/100, v.n) - v.K}] }
+];
+const fSelect = document.getElementById('fSelect');
+const fInputs = document.getElementById('fInputs');
+const fOutputs = document.getElementById('fOutputs');
+function fmtOut(x){
+  if(typeof x === 'string') return x;
+  if(!isFinite(x)) return '–';
+  return String(parseFloat(x.toPrecision(10)));
+}
+function runFormula(){
+  const F = CALC_FORMULAS[parseInt(fSelect.value, 10)];
+  const vals = {};
+  let ok = true;
+  F.inputs.forEach(inp=>{
+    const n = parseNum(document.getElementById('fin_'+inp.id).value);
+    vals[inp.id] = n;
+    if(isNaN(n)) ok = false;
+  });
+  fOutputs.innerHTML = F.outputs.map((o,i)=>{
+    const raw = ok ? o.f(vals) : '–';
+    const txt = fmtOut(raw);
+    const num = typeof raw === 'number' && isFinite(raw);
+    return `<div class="calc-out">
+      <span class="calc-out-label">${escapeHtmlGlobal(o.label)}</span>
+      <span class="calc-out-val">${escapeHtmlGlobal(txt)}${num && o.unit ? ' '+escapeHtmlGlobal(o.unit) : ''}</span>
+      ${num ? `<button class="back-btn" data-out="${i}" title="In den Rechner übernehmen">↳</button>` : ''}
+    </div>`;
+  }).join('');
+  fOutputs.querySelectorAll('button[data-out]').forEach(b=>{
+    b.onclick = ()=>{
+      const o = F.outputs[parseInt(b.dataset.out, 10)];
+      calcUseValue(o.f(vals));
+    };
+  });
+}
+function renderFormula(){
+  const F = CALC_FORMULAS[parseInt(fSelect.value, 10)];
+  fInputs.innerHTML = F.inputs.map(inp=>`<label>${escapeHtmlGlobal(inp.label)}${inp.unit ? ' ['+escapeHtmlGlobal(inp.unit)+']' : ''}
+    <input id="fin_${inp.id}" class="chat-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></label>`).join('');
+  F.inputs.forEach(inp=>{ document.getElementById('fin_'+inp.id).oninput = runFormula; });
+  runFormula();
+}
+fSelect.innerHTML = CALC_FORMULAS.map((f,i)=>`<option value="${i}">${escapeHtmlGlobal(f.name)}</option>`).join('');
+fSelect.onchange = renderFormula;
+renderFormula();
 
 /* ---------------- Game Menu -> Play routing ---------------- */
 document.querySelectorAll('[data-game]').forEach(btn=>{
@@ -1834,68 +2251,153 @@ function createGameOverOverlay(wrapEl){
 function initSnake(area){
   area.innerHTML = `
     <div class="score">Punkte: <span id="snakeScore">0</span> &nbsp;|&nbsp; 🏆 Highscore: <span id="snakeHigh">0</span></div>
+    <div class="score" id="snakeStatus">❤️ Extra-Leben: <span id="snakeLives">0</span> &nbsp;|&nbsp; 🛡️ Schutz: <span id="snakeShield">–</span></div>
     <div class="game-stage" id="snakeStage">
       <canvas id="snakeCanvas" width="320" height="320"></canvas>
     </div>
-    <div class="hint">Pfeiltasten / WASD oder Wischen zum Steuern — Wände sind tödlich!</div>
+    <div class="hint">Pfeiltasten / WASD oder Wischen zum Steuern — Wände sind tödlich!<br>
+      💎 Schildfrucht: kurz unverwundbar — du gehst durch dich selbst und durch Wände (kommst auf der anderen Seite raus).<br>
+      ❤️ Herzfrucht: ein Extra-Leben.</div>
   `;
   const canvas = document.getElementById('snakeCanvas');
   const ctx = canvas.getContext('2d');
   const goOverlay = createGameOverOverlay(document.getElementById('snakeStage'));
   const grid = 16;
   const cells = canvas.width/grid;
-  let snake, dir, nextDir, food, score, alive, loopId;
+  const STEP_MS = 120;
+  const SHIELD_TICKS = Math.round(5000/STEP_MS);        // ca. 5 Sekunden Unverwundbarkeit
+  const REVIVE_SHIELD_TICKS = Math.round(2000/STEP_MS); // 2 Sekunden Schutz nach Verlust eines Extra-Lebens
+  const FRUIT_TTL = Math.round(12000/STEP_MS);          // Sonderfrüchte verschwinden nach ca. 12 Sekunden
+  let snake, dir, nextDir, food, score, alive, loopId, shield, lives, shieldFruit, lifeFruit, tick;
 
   document.getElementById('snakeHigh').textContent = getHighscore('snake');
 
+  function freeCell(){
+    for(let i=0;i<300;i++){
+      const c = {x:Math.floor(Math.random()*cells), y:Math.floor(Math.random()*cells)};
+      const taken = snake.some(s=>s.x===c.x&&s.y===c.y)
+        || (food && food.x===c.x && food.y===c.y)
+        || (shieldFruit && shieldFruit.x===c.x && shieldFruit.y===c.y)
+        || (lifeFruit && lifeFruit.x===c.x && lifeFruit.y===c.y);
+      if(!taken) return c;
+    }
+    return {x:0,y:0};
+  }
+  function updateStatus(){
+    document.getElementById('snakeLives').textContent = lives;
+    document.getElementById('snakeShield').textContent = shield > 0 ? (shield*STEP_MS/1000).toFixed(1)+' s' : '–';
+  }
   function reset(){
     snake = [{x:8,y:8},{x:7,y:8},{x:6,y:8}];
     dir = {x:1,y:0};
     nextDir = {x:1,y:0};
-    score = 0;
-    alive = true;
-    placeFood();
+    score = 0; alive = true; shield = 0; lives = 0; tick = 0;
+    shieldFruit = null; lifeFruit = null; food = null;
+    food = freeCell();
     document.getElementById('snakeScore').textContent = score;
+    updateStatus();
   }
-  function placeFood(){
-    food = {x:Math.floor(Math.random()*cells), y:Math.floor(Math.random()*cells)};
+  function heartPath(cx, cy, s){
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s*0.9);
+    ctx.bezierCurveTo(cx - s*1.6, cy - s*0.1, cx - s*0.7, cy - s*1.2, cx, cy - s*0.4);
+    ctx.bezierCurveTo(cx + s*0.7, cy - s*1.2, cx + s*1.6, cy - s*0.1, cx, cy + s*0.9);
+    ctx.closePath();
   }
   function draw(){
     ctx.fillStyle = '#081733';
     ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#e05d6f';
+    // Rand: durchlässig (gestrichelt, cyan) solange der Schutz aktiv ist
+    if(shield > 0){ ctx.setLineDash([8,6]); ctx.strokeStyle = '#5ef0ff'; }
+    else { ctx.setLineDash([]); ctx.strokeStyle = '#e05d6f'; }
     ctx.lineWidth = 4;
     ctx.strokeRect(2,2,canvas.width-4,canvas.height-4);
+    ctx.setLineDash([]);
+    // normale Frucht
     ctx.fillStyle = '#ffd166';
     ctx.fillRect(food.x*grid, food.y*grid, grid-2, grid-2);
-    ctx.fillStyle = '#5ec8ff';
+    // Schildfrucht (💎)
+    const pulse = 0.5 + 0.5*Math.sin(tick*0.6);
+    const blink = (f)=> f.ttl > 24 || tick % 2 === 0;
+    if(shieldFruit && blink(shieldFruit)){
+      const cx = shieldFruit.x*grid + grid/2 - 1, cy = shieldFruit.y*grid + grid/2 - 1;
+      ctx.fillStyle = `rgba(94,240,255,${0.25+0.25*pulse})`;
+      ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#5ef0ff';
+      ctx.beginPath(); ctx.moveTo(cx, cy-7); ctx.lineTo(cx+6, cy); ctx.lineTo(cx, cy+7); ctx.lineTo(cx-6, cy); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    // Herzfrucht (❤️)
+    if(lifeFruit && blink(lifeFruit)){
+      const cx = lifeFruit.x*grid + grid/2 - 1, cy = lifeFruit.y*grid + grid/2 - 1;
+      ctx.fillStyle = `rgba(255,56,96,${0.25+0.25*pulse})`;
+      ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#ff3860';
+      heartPath(cx, cy, 5.5); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // Schlange (mit Schutz: blinkend weiß/cyan)
     snake.forEach((s,i)=>{
-      ctx.fillStyle = i===0 ? '#eaf4ff' : '#5ec8ff';
+      if(shield > 0) ctx.fillStyle = (tick + i) % 2 ? '#ffffff' : '#7ff8ff';
+      else ctx.fillStyle = i===0 ? '#eaf4ff' : '#5ec8ff';
       ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
     });
-    if(!alive){
-      const hs = maybeUpdateHighscore('snake', score);
-      document.getElementById('snakeHigh').textContent = hs;
-      goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); draw(); });
-    }
+  }
+  function gameOver(){
+    alive = false;
+    draw();
+    const hs = maybeUpdateHighscore('snake', score);
+    document.getElementById('snakeHigh').textContent = hs;
+    goOverlay.show('Game Over', 'Du hast '+score+' Punkte erreicht. (Highscore: '+hs+')', 'lose', ()=>{ reset(); draw(); });
   }
   function step(){
     if(!alive || gamePaused) return;
+    tick++;
     dir = nextDir;
-    const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
-    if(head.x<0||head.y<0||head.x>=cells||head.y>=cells||snake.some(s=>s.x===head.x&&s.y===head.y)){
-      alive = false;
-      draw();
-      return;
+    let head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
+    const out = head.x<0||head.y<0||head.x>=cells||head.y>=cells;
+    const self = snake.some(s=>s.x===head.x&&s.y===head.y);
+
+    if(shield > 0){
+      // Unverwundbar: durch sich selbst hindurch, durch Wände auf die andere Seite
+      if(out) head = {x:(head.x+cells)%cells, y:(head.y+cells)%cells};
+    } else if(out || self){
+      if(lives > 0){
+        lives--;                               // Extra-Leben verbraucht
+        shield = REVIVE_SHIELD_TICKS;          // kurzer Schutz, um sich zu retten
+        head = {x:(head.x+cells)%cells, y:(head.y+cells)%cells};
+      } else {
+        gameOver();
+        return;
+      }
     }
+
     snake.unshift(head);
+    let grew = false;
     if(head.x===food.x && head.y===food.y){
-      score++;
+      score++; grew = true;
       document.getElementById('snakeScore').textContent = score;
-      placeFood();
-    }else{
-      snake.pop();
+      food = freeCell();
+      // Sonderfrüchte: 50 % Schildfrucht, 10 % Extra-Leben
+      if(!shieldFruit && Math.random() < 0.5){ const c = freeCell(); shieldFruit = {x:c.x, y:c.y, ttl:FRUIT_TTL}; }
+      if(!lifeFruit && Math.random() < 0.1){ const c = freeCell(); lifeFruit = {x:c.x, y:c.y, ttl:FRUIT_TTL}; }
     }
+    if(shieldFruit && head.x===shieldFruit.x && head.y===shieldFruit.y){
+      shield = Math.max(shield, SHIELD_TICKS);
+      shieldFruit = null; score += 2;
+      document.getElementById('snakeScore').textContent = score;
+    }
+    if(lifeFruit && head.x===lifeFruit.x && head.y===lifeFruit.y){
+      lives++;
+      lifeFruit = null; score += 2;
+      document.getElementById('snakeScore').textContent = score;
+    }
+    if(!grew) snake.pop();
+
+    if(shield > 0) shield--;
+    if(shieldFruit && --shieldFruit.ttl <= 0) shieldFruit = null;
+    if(lifeFruit && --lifeFruit.ttl <= 0) lifeFruit = null;
+    updateStatus();
     draw();
   }
   function keyHandler(e){
@@ -1917,7 +2419,7 @@ function initSnake(area){
     let nd;
     if(Math.abs(dx) > Math.abs(dy)) nd = dx>0 ? {x:1,y:0} : {x:-1,y:0};
     else nd = dy>0 ? {x:0,y:1} : {x:0,y:-1};
-    if(!(nd.x===-dir.x && nd.y===-dir.y)) nextDir = nd;
+    if(!(nd.x===-nextDir.x && nd.y===-nextDir.y)) nextDir = nd;
   }
   document.addEventListener('keydown', keyHandler);
   canvas.addEventListener('touchstart', touchStartH);
@@ -1925,7 +2427,7 @@ function initSnake(area){
 
   reset();
   draw();
-  loopId = setInterval(step, 120);
+  loopId = setInterval(step, STEP_MS);
 
   return function stop(){
     clearInterval(loopId);
@@ -2496,25 +2998,38 @@ function initMerge(area){
 ================================================================= */
 function initWar(area){
   const CASTLE_HP = [1000,1500,2000,2500,3000,3500,4000,4500,5000,5000];
-  const SS = 2;                        // Tempo-Faktor, weil die Karte jetzt länger ist
-  const WORLD_W = 1920;                // Weltbreite (die Ansicht ist 640 breit)
-  const TOWER_FROM_LEVEL = 6;          // ab diesem Level kann man Wachtürme bauen
-  const TOWER_COST = 150;              // Stein pro Wachturm
-  const STONE_PER_TRIP = 50;           // Stein pro Fuhre
-  const TOWER_SLOTS = [520, 700, 880]; // Bauplätze (Welt-x)
-  const TOWER_DEF = { name:'Wachturm', hp:450, dmg:30, range:190, atkTime:1.3, role:'tower' };
-  const GOLD_X = 190, QUARRY_X = 330;
+  const SS = 2;                          // Tempo-Faktor, weil die Karte länger ist
+  const WORLD_W = 1920;                  // Weltbreite (die Ansicht ist 640 breit)
+  const TOWER_FROM_LEVEL = 6;            // ab diesem Level kann man Türme bauen
+  const GOLD_PER_TRIP = 100;             // Gold pro Fuhre (Schubkarre)
+  const STONE_PER_TRIP = 50;             // Stein kommt bei jeder Fuhre dazu
+  const CONVERT_STONE = 50, CONVERT_GOLD = 10;   // 50 Stein -> 10 Gold
+  const CASTLE_HALF = 52;                // halbe Burgbreite
+  const GOLD_X = 230;                    // Mine (Gold + Stein)
+  const TOWER_SLOTS = [440, 600, 760, 920];      // Bauplätze (Welt-x)
+  const MAX_PLAYER_UNITS = 14;           // eigene Truppen (ohne Türme)
+  const MAX_ENEMY_FIGHTERS = 12;         // gegnerische Kämpfer (Miner zählen extra)
+  const MAX_TOWER_NINJAS = 6;            // gleichzeitig lebende Ninjas aus Ninjatürmen
+  const GARRISON_OFFSETS = [-40,-20,0,20,40];    // Plätze oben auf der Mauer
+
+  const TOWER_TYPES = {
+    archer: { key:'tower',      kind:'archer', name:'Bogenturm',  icon:'🏹', cost:150, hp:450, dmg:30, range:190, atkTime:1.3, role:'tower' },
+    mage:   { key:'mage',       kind:'mage',   name:'Magierturm', icon:'🔥', cost:250, hp:500, dmg:60, range:210, atkTime:1.8, role:'tower', splash:45 },
+    ninja:  { key:'ninjatower', kind:'ninja',  name:'Ninjaturm',  icon:'🥷', cost:500, hp:650, dmg:0,  range:0,   atkTime:0,   role:'tower', spawnEvery:20 }
+  };
 
   const UNIT_DEFS = {
-    miner:     { name:'Minenarbeiter', icon:'⛏️', cost:50,  hp:50,  dmg:0,  speed:38*SS, range:0,  atkTime:0,   role:'miner' },
-    sword:     { name:'Schwertkämpfer', icon:'🗡️', cost:75,  hp:100, dmg:20, speed:34*SS, range:16, atkTime:0.7, role:'melee' },
-    archer:    { name:'Bogenschütze', icon:'🏹', cost:100, hp:75,  dmg:35, speed:34*SS, range:130, atkTime:1.1, role:'ranged' },
-    berserker: { name:'Berserker', icon:'🔨', cost:125, hp:200, dmg:45, speed:30*SS, range:20, atkTime:0.9, role:'melee', big:true },
-    mage:      { name:'Magier', icon:'🔥', cost:150, hp:100, dmg:55, speed:32*SS, range:150, atkTime:1.4, role:'ranged' },
-    ninja:     { name:'Ninja', icon:'🥷', cost:200, hp:150, dmg:60, speed:46*SS, range:16, atkTime:0.6, role:'stealth' }
+    miner:     { name:'Minenarbeiter',  icon:'⛏️', cost:50,  hp:50,  dmg:0,  speed:38*SS, range:0,   atkTime:0,   role:'miner' },
+    sword:     { name:'Schwertkämpfer', icon:'🗡️', cost:75,  hp:100, dmg:20, speed:34*SS, range:16,  atkTime:0.7, role:'melee' },
+    archer:    { name:'Bogenschütze',   icon:'🏹', cost:100, hp:75,  dmg:35, speed:34*SS, range:130, atkTime:1.1, role:'ranged' },
+    berserker: { name:'Berserker',      icon:'🔨', cost:125, hp:200, dmg:45, speed:30*SS, range:20,  atkTime:0.9, role:'melee', big:true },
+    mage:      { name:'Magier',         icon:'🔥', cost:150, hp:100, dmg:55, speed:32*SS, range:150, atkTime:1.4, role:'ranged' },
+    ninja:     { name:'Ninja',          icon:'🥷', cost:200, hp:150, dmg:60, speed:46*SS, range:16,  atkTime:0.6, role:'stealth' },
+    // Superkrieger: Son Goku als Stickman — schnell, stark, weicht Angriffen aus (Instinkt)
+    super:     { name:'Superkrieger',   icon:'⚡', cost:500, hp:600, dmg:70, speed:50*SS, range:22,  atkTime:0.5, role:'melee', scale:1.2, dodge:0.35 }
   };
   const unitKeys = Object.keys(UNIT_DEFS);
-  const enemyPool = ['sword','sword','archer','berserker','mage','ninja'];
+  const enemyBasePool = ['sword','sword','archer'];       // wird nach Level erweitert
 
   area.innerHTML = `
     <div id="warMapView" class="war-map-view"></div>
@@ -2522,7 +3037,7 @@ function initWar(area){
       <div class="war-hud">
         <span class="lvl">LEVEL <span id="warLevel">1</span> / 10</span>
         <span class="gold">💰 <span id="warGold">200</span></span>
-        <span class="gold" id="warStoneWrap" style="display:none;color:#c5cce0;text-shadow:none;">🪨 <span id="warStone">0</span></span>
+        <span class="gold" id="warStoneWrap" style="color:#c5cce0;text-shadow:none;">🪨 <span id="warStone">0</span></span>
         <span class="lvl">🏆 Bestes Level: <span id="warHigh">0</span></span>
       </div>
       <div class="war-castles">
@@ -2546,9 +3061,14 @@ function initWar(area){
         <button class="back-btn" id="camAuto">📷 Auto: An</button>
         <button class="back-btn" id="camMap">🗺️ Karte</button>
       </div>
+      <div class="war-stance" id="warStance">
+        <button id="stGarrison" title="Alle Truppen (außer Ninjas und Minenarbeiter) gehen in die Burg. Bogenschützen und Magier schießen von oben.">🏰 In der Burg versammeln</button>
+        <button id="stFormation" title="Truppen stellen sich vor der Burg auf: Nahkämpfer vorne, Fernkämpfer hinten.">🛡️ Aufstellen</button>
+        <button id="stAttack" title="Alle Truppen außer Minenarbeitern greifen an.">⚔️ Angriff</button>
+      </div>
       <div class="war-msg" id="warMsg">Baue deine Armee auf und zerstöre die gegnerische Burg!</div>
       <div class="war-shop" id="warShop"></div>
-      <div class="war-extra" id="warExtra" style="display:none;"></div>
+      <div class="war-extra" id="warExtra"></div>
     </div>
   `;
 
@@ -2559,76 +3079,110 @@ function initWar(area){
   const mctx = mini.getContext('2d');
   const W = canvas.width, H = canvas.height;       // W = sichtbare Breite
   const groundY = H - 30;
-  const playerCastleX = 60, enemyCastleX = WORLD_W - 60;
+  const playerCastleX = 80, enemyCastleX = WORLD_W - 80;
+  const FORM_RANGED_X = playerCastleX + CASTLE_HALF + 60;    // Fernkämpfer stehen hinten
+  const FORM_MELEE_X  = playerCastleX + CASTLE_HALF + 150;   // Nahkämpfer stehen vorne
   const landscape = createLandscape(WORLD_W, H, groundY);
-  const MAX_UNITS_PER_SIDE = 10;
   const keysDown = { left:false, right:false };
+  const isRecharger = ()=>!!currentUser && currentUser.key === SPECIAL_NAME.toLowerCase();
+  const unitCost = key=>(key === 'super' && isRecharger()) ? 0 : UNIT_DEFS[key].cost;   // Recharger: Superkrieger gratis
 
   document.getElementById('warHigh').textContent = getHighscore('war') || 0;
 
   let level, gold, playerCastleHP, playerCastleMax, enemyCastleHP, enemyCastleMax;
-  let units = [], over = true, won, rafId, lastTime, enemySpawnTimer, hudTimer = 0;
-  let stone = 0, mineMode = 'gold', cam = 0, autoCam = true, inMap = true;
+  let units = [], over = true, won, rafId, lastTime, hudTimer = 0;
+  let stone = 0, cam = 0, autoCam = true, inMap = true;
+  let stance = 'attack';                           // 'garrison' | 'formation' | 'attack'
+  let enemyGold = 0, enemyStone = 0, aiTimer = 0, aiWant = null;
 
+  /* ---------------- Shop, Umwandlung, Türme, Befehle ---------------- */
   function buildShop(){
     const shop = document.getElementById('warShop');
     shop.innerHTML = '';
     unitKeys.forEach(key=>{
       const def = UNIT_DEFS[key];
       const btn = document.createElement('button');
-      btn.className = 'war-unit-btn';
+      btn.className = 'war-unit-btn' + (key === 'super' ? ' war-super' : '');
       btn.id = 'buy_'+key;
-      btn.innerHTML = `<span class="u-icon">${def.icon}</span><span>${def.name}</span><span class="u-cost">${def.cost}g</span>`;
+      const costLabel = unitCost(key) === 0 ? 'GRATIS' : def.cost+'g';
+      btn.innerHTML = `<span class="u-icon">${def.icon}</span><span>${def.name}</span><span class="u-cost">${costLabel}</span>`;
       btn.addEventListener('click', ()=>spawnPlayerUnit(key));
       shop.appendChild(btn);
     });
     document.getElementById('warExtra').innerHTML = `
-      <button class="war-unit-btn" id="warModeBtn"><span class="u-icon">⛏️</span><span id="warModeLabel">Abbau: 💰 Gold</span></button>
-      <button class="war-unit-btn" id="warTowerBtn"><span class="u-icon">🗼</span><span>Wachturm bauen</span><span class="u-cost">${TOWER_COST} 🪨</span></button>`;
-    document.getElementById('warModeBtn').onclick = toggleMineMode;
-    document.getElementById('warTowerBtn').onclick = buildTower;
+      <button class="war-unit-btn war-wide" id="warConvertBtn"><span class="u-icon">🔄</span><span>Stein in Gold umwandeln</span><span class="u-cost">${CONVERT_STONE} 🪨 → ${CONVERT_GOLD} 💰</span></button>
+      <div class="war-towers" id="warTowers">
+        ${Object.entries(TOWER_TYPES).map(([k,T])=>`<button class="war-unit-btn" id="warTower_${k}"><span class="u-icon">${T.icon}</span><span>${T.name}</span><span class="u-cost">${T.cost} 🪨</span></button>`).join('')}
+      </div>`;
+    document.getElementById('warConvertBtn').onclick = convertStone;
+    Object.keys(TOWER_TYPES).forEach(k=>{ document.getElementById('warTower_'+k).onclick = ()=>buildTower(k); });
+    document.getElementById('stGarrison').onclick = ()=>setStance('garrison');
+    document.getElementById('stFormation').onclick = ()=>setStance('formation');
+    document.getElementById('stAttack').onclick = ()=>setStance('attack');
   }
   function refreshShop(){
     unitKeys.forEach(key=>{
-      document.getElementById('buy_'+key).disabled = over || gold < UNIT_DEFS[key].cost;
+      document.getElementById('buy_'+key).disabled = over || gold < unitCost(key);
     });
-    if(level >= TOWER_FROM_LEVEL){
-      const used = units.filter(u=>u.def.role==='tower' && !u.dead).length;
-      document.getElementById('warTowerBtn').disabled = over || stone < TOWER_COST || used >= TOWER_SLOTS.length;
+    document.getElementById('warConvertBtn').disabled = over || stone < CONVERT_STONE;
+    const towers = level >= TOWER_FROM_LEVEL;
+    document.getElementById('warTowers').style.display = towers ? '' : 'none';
+    if(towers){
+      const full = !TOWER_SLOTS.some((_,i)=>!towerAt(i));
+      Object.entries(TOWER_TYPES).forEach(([k,T])=>{
+        document.getElementById('warTower_'+k).disabled = over || stone < T.cost || full;
+      });
     }
   }
-  function toggleMineMode(){
+  function convertStone(){
     if(over) return;
-    mineMode = mineMode === 'gold' ? 'stone' : 'gold';
-    document.getElementById('warModeLabel').textContent = 'Abbau: ' + (mineMode === 'gold' ? '💰 Gold' : '🪨 Stein');
-    document.getElementById('warMsg').textContent = mineMode === 'stone'
-      ? `Deine Minenarbeiter holen jetzt Stein (${STONE_PER_TRIP} pro Fuhre) für Wachtürme.`
-      : 'Deine Minenarbeiter holen wieder Gold (100 pro Fuhre).';
+    if(stone < CONVERT_STONE) return;
+    stone -= CONVERT_STONE; gold += CONVERT_GOLD;
+    document.getElementById('warMsg').textContent = `${CONVERT_STONE} Stein in ${CONVERT_GOLD} Gold umgewandelt.`;
+    updateHUD();
+  }
+  function updateStanceButtons(){
+    document.getElementById('stGarrison').classList.toggle('active', stance === 'garrison');
+    document.getElementById('stFormation').classList.toggle('active', stance === 'formation');
+    document.getElementById('stAttack').classList.toggle('active', stance === 'attack');
+  }
+  function setStance(s){
+    if(over) return;
+    stance = s;
+    for(const u of units){
+      if(u.side !== 'player') continue;
+      if(s !== 'garrison') u.inside = false;          // aus der Burg heraus
+      u.queued = false;
+    }
+    updateStanceButtons();
+    document.getElementById('warMsg').textContent =
+      s === 'garrison'  ? 'Truppen sammeln sich in der Burg. Bogenschützen und Magier schießen von oben.' :
+      s === 'formation' ? 'Truppen stellen sich vor der Burg auf: Nahkämpfer vorne, Fernkämpfer hinten.' :
+                          'Angriff! Alle Truppen außer den Minenarbeitern marschieren los.';
   }
 
+  /* ---------------- Level / HUD ---------------- */
   function startLevel(n){
     level = n;
-    gold = 200; stone = 0; mineMode = 'gold';
+    gold = 200; stone = 0;
     playerCastleMax = CASTLE_HP[n-1];
     enemyCastleMax = CASTLE_HP[n-1];
     playerCastleHP = playerCastleMax;
     enemyCastleHP = enemyCastleMax;
     units = []; projectiles = [];
     over = false; won = false;
-    enemySpawnTimer = 3;
+    stance = 'attack';
+    enemyGold = 100 + n*20; enemyStone = 0; aiTimer = 2; aiWant = null;
     inMap = false; autoCam = true; cam = 0;
     goOverlay.hide();
     document.getElementById('warMapView').style.display = 'none';
     document.getElementById('warGameView').style.display = 'flex';
-    const towers = level >= TOWER_FROM_LEVEL;
-    document.getElementById('warExtra').style.display = towers ? '' : 'none';
-    document.getElementById('warStoneWrap').style.display = towers ? '' : 'none';
-    document.getElementById('warModeLabel').textContent = 'Abbau: 💰 Gold';
     document.getElementById('warLevel').textContent = level;
     document.getElementById('warHigh').textContent = getHighscore('war') || 0;
-    document.getElementById('warMsg').textContent = towers
-      ? 'Tipp: Stelle den Abbau auf Stein um und baue Wachtürme (🗼) an den Bauplätzen.'
-      : 'Baue deine Armee auf und zerstöre die gegnerische Burg!';
+    document.getElementById('warMsg').textContent = level >= TOWER_FROM_LEVEL
+      ? 'Tipp: Minenarbeiter holen Gold UND Stein. Aus Stein baust du Türme (🏹 🔥 🥷).'
+      : 'Minenarbeiter holen Gold und Stein. Der Gegner braucht ebenfalls Minenarbeiter — schalte sie aus!';
+    updateStanceButtons();
     refreshCamBtn();
     updateHUD();
   }
@@ -2642,26 +3196,21 @@ function initWar(area){
 
   function spawnPlayerUnit(key){
     if(over) return;
-    const def = UNIT_DEFS[key];
-    if(gold < def.cost) return;
-    if(units.filter(u=>u.side==='player' && u.def.role!=='tower').length >= MAX_UNITS_PER_SIDE){
+    const cost = unitCost(key);
+    if(gold < cost) return;
+    if(units.filter(u=>u.side==='player' && u.def.role!=='tower').length >= MAX_PLAYER_UNITS){
       document.getElementById('warMsg').textContent = 'Maximale Truppenstärke erreicht — warte, bis Einheiten fallen.';
       return;
     }
-    gold -= def.cost;
+    gold -= cost;
     units.push(makeUnit('player', key));
     updateHUD();
-  }
-  function spawnEnemyUnit(){
-    if(units.filter(u=>u.side==='enemy').length >= MAX_UNITS_PER_SIDE) return;
-    const key = enemyPool[Math.floor(Math.random()*Math.min(enemyPool.length, 2 + level))];
-    units.push(makeUnit('enemy', key));
   }
   function makeUnit(side, key){
     const def = UNIT_DEFS[key];
     return {
       side, key, def,
-      x: side==='player' ? playerCastleX+10 : enemyCastleX-10,
+      x: side==='player' ? playerCastleX : enemyCastleX,      // Einheiten kommen aus dem Burgtor
       y: groundY,
       hp: def.hp, maxHp: def.hp,
       target: null,
@@ -2669,6 +3218,7 @@ function initWar(area){
       state: key==='miner' ? 'toMine' : (key==='ninja' ? 'sneak' : 'walk'),
       mineTimer: 0,
       stealth: key==='ninja',
+      inside: false,
       dead:false,
       anim:0
     };
@@ -2677,113 +3227,190 @@ function initWar(area){
   function distance(a,b){ return Math.abs(a.x-b.x); }
   function dir(u){ return u.side==='player' ? 1 : -1; }
   function enemySide(u){ return u.side==='player' ? 'enemy' : 'player'; }
+  function effRange(u){ return u.def.range * (u.inside ? 1.4 : 1); }   // von der Mauer reicht es weiter
 
   function findTarget(u){
     let best=null, bestD=Infinity;
+    const aggro = Math.max(effRange(u), 26);
     for(const o of units){
       if(o===u || o.dead || o.side===u.side) continue;
-      if(o.stealth) continue; // Ninja im Sneak-Modus ist unsichtbar
+      if(o.stealth || o.inside) continue;      // Ninjas im Sneak-Modus und Truppen in der Burg sind nicht angreifbar
       const d = distance(u,o);
-      const aggro = Math.max(u.def.range, 26);
       if(d <= aggro && d < bestD){ best=o; bestD=d; }
     }
     return best;
   }
 
+  /* ---------------- Gegner-KI: braucht Minenarbeiter, um Truppen zu kaufen ---------------- */
+  function pickEnemyUnit(){
+    const pool = enemyBasePool.slice();
+    if(level >= 3) pool.push('berserker');
+    if(level >= 5) pool.push('mage');
+    if(level >= 7) pool.push('ninja');
+    if(level >= 9) pool.push('berserker', 'mage');
+    return pool[Math.floor(Math.random()*pool.length)];
+  }
+  function enemyAI(){
+    // Stein lässt sich (wie beim Spieler) in Gold umwandeln
+    while(enemyStone >= CONVERT_STONE){ enemyStone -= CONVERT_STONE; enemyGold += CONVERT_GOLD; }
+    const miners = units.filter(u=>u.side==='enemy' && u.def.role==='miner' && !u.dead).length;
+    const fighters = units.filter(u=>u.side==='enemy' && u.def.role!=='miner' && u.def.role!=='tower' && !u.dead).length;
+    const wantedMiners = 1 + Math.floor(level/3);           // Level 1-2: 1, ... Level 9-10: 4
+    if(miners < wantedMiners){
+      if(enemyGold >= UNIT_DEFS.miner.cost){
+        enemyGold -= UNIT_DEFS.miner.cost;
+        units.push(makeUnit('enemy', 'miner'));
+      }
+      return;                                               // erst Einkommen sichern
+    }
+    if(fighters >= MAX_ENEMY_FIGHTERS) return;
+    if(!aiWant) aiWant = pickEnemyUnit();
+    const cost = UNIT_DEFS[aiWant].cost;
+    if(enemyGold >= cost){                                  // ohne Gold keine Truppen!
+      enemyGold -= cost;
+      units.push(makeUnit('enemy', aiWant));
+      aiWant = null;
+    }
+  }
+
+  /* ---------------- Befehle: Versammeln / Aufstellen / Angriff ---------------- */
+  function garrisonStep(u, dt){
+    if(u.inside){ u.state = 'garrison'; return; }
+    const dx = playerCastleX - u.x;
+    if(Math.abs(dx) <= 4){ u.inside = true; u.target = null; u.state = 'garrison'; return; }
+    u.x += Math.sign(dx) * Math.min(Math.abs(dx), u.def.speed*dt);
+    u.state = 'walk';
+  }
+  function formationStep(u, dt){
+    u.inside = false;
+    const base = u.def.role === 'ranged' ? FORM_RANGED_X : FORM_MELEE_X;
+    const tx = base + ((u.fidx || 0) % 6) * 12;
+    const dx = tx - u.x;
+    if(Math.abs(dx) <= 3){ u.state = 'hold'; return; }
+    u.x += Math.sign(dx) * Math.min(Math.abs(dx), u.def.speed*dt);
+    u.state = 'walk';
+  }
+  function attackStep(u, dt){
+    u.inside = false;
+    const castleX = u.side==='player' ? enemyCastleX : playerCastleX;
+    const edge = CASTLE_HALF + 6;
+    const reachedCastle = u.side==='player' ? u.x >= castleX-edge : u.x <= castleX+edge;
+    if(reachedCastle){
+      if(!u.queued){
+        // Warteschlangen-Position nur EINMAL beim ersten Erreichen der Burg vergeben
+        const aheadCount = units.filter(o=>o!==u && !o.dead && o.queued && o.side===u.side).length;
+        u.queueOffset = Math.min(aheadCount, 6) * 10;
+        u.x = u.side==='player' ? castleX-edge-u.queueOffset : castleX+edge+u.queueOffset;
+        u.queued = true;
+      }
+      u.state = 'attackCastle';
+      u.atkCooldown -= dt;
+      if(u.atkCooldown<=0){
+        const dmg = u.def.dmg || 8;
+        if(u.side==='player'){ enemyCastleHP = Math.max(0, enemyCastleHP-dmg); }
+        else { playerCastleHP = Math.max(0, playerCastleHP-dmg); }
+        u.atkCooldown = u.def.atkTime || 0.8;
+      }
+      // Die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an.
+      const castleCounter = 10 + level*1.2;
+      u.hp -= castleCounter*dt;
+      if(u.hp<=0 && !u.dead){ u.dead = true; }
+    } else {
+      u.x += dir(u)*u.def.speed*dt;
+      u.state='walk';
+    }
+  }
+
   function update(dt){
     if(over) return;
 
-    // Gegner-Spawns
-    enemySpawnTimer -= dt;
-    if(enemySpawnTimer <= 0){
-      spawnEnemyUnit();
-      enemySpawnTimer = Math.max(1.4, 4.2 - level*0.28);
+    // Gegner kauft Truppen nur, solange es Gold hat (Gold kommt von seinen Minenarbeitern)
+    aiTimer -= dt;
+    if(aiTimer <= 0){
+      aiTimer = Math.max(0.6, 2.4 - level*0.14);
+      enemyAI();
+    }
+
+    // Plätze für Aufstellung und Burgbesatzung vorberechnen
+    if(stance === 'formation'){
+      let mi = 0, ri = 0;
+      for(const u of units){
+        if(u.dead || u.side!=='player') continue;
+        if(u.def.role==='melee') u.fidx = mi++;
+        else if(u.def.role==='ranged') u.fidx = ri++;
+      }
+    }
+    if(stance === 'garrison'){
+      let gi = 0;
+      for(const u of units){
+        if(u.dead || u.side!=='player' || !u.inside) continue;
+        if(u.def.role === 'ranged'){ u.x = playerCastleX + GARRISON_OFFSETS[gi % GARRISON_OFFSETS.length]; gi++; }
+        else u.x = playerCastleX;
+      }
     }
 
     for(const u of units){
       if(u.dead) continue;
       u.anim += dt;
+      if(u.dodgeFx > 0) u.dodgeFx -= dt;
 
       if(u.def.role==='tower'){ updateTower(u, dt); continue; }
-
-      if(u.def.role==='miner'){
-        updateMiner(u, dt);
-        continue;
-      }
+      if(u.def.role==='miner'){ updateMiner(u, dt); continue; }
 
       if(u.key==='ninja' && u.stealth){
-        // sneak straight to enemy castle, ignoring all units
+        // schleicht unbemerkt bis zur gegnerischen Burg (egal welcher Befehl gilt)
         u.x += dir(u)*u.def.speed*dt;
-        const reached = u.side==='player' ? u.x >= enemyCastleX-14 : u.x <= playerCastleX+14;
+        const reached = u.side==='player' ? u.x >= enemyCastleX-CASTLE_HALF-4 : u.x <= playerCastleX+CASTLE_HALF+4;
         if(reached){ u.stealth=false; u.state='attackCastle'; }
         continue;
       }
 
-      // Ziel prüfen
-      if(u.target && (u.target.dead || u.target.hp<=0)) u.target = null;
-      if(!u.target){
-        const t = findTarget(u);
-        if(t){ u.target = t; u.state = 'fight'; }
-      }
+      // Befehle gelten nur für die eigenen Truppen (außer Ninjas); der Gegner greift immer an
+      const st = (u.side==='player' && u.def.role!=='stealth') ? stance : 'attack';
+      const sitting = u.inside && u.def.role !== 'ranged';     // Nahkämpfer in der Burg warten nur
 
-      if(u.state === 'fight' && u.target){
-        const d = distance(u,u.target);
-        const towardTarget = Math.sign(u.target.x - u.x) || dir(u); // BUGFIX: echte Zielrichtung statt fester Seiten-Richtung
-        const tgt = u.target; // BUGFIX: Referenz sichern — dealDamage() kann u.target auf null setzen, wenn das Ziel stirbt
-        if(u.def.role==='melee'){
-          if(d > u.def.range){
-            u.x += towardTarget*u.def.speed*dt; // sich zum echten Ziel bewegen
-          } else {
-            u.atkCooldown -= dt;
-            if(u.atkCooldown<=0){
-              dealDamage(u, tgt, u.def.dmg);
-              u.atkCooldown = u.def.atkTime;
+      if(!sitting){
+        if(u.target && (u.target.dead || u.target.hp<=0)) u.target = null;
+        if(!u.target){
+          const t = findTarget(u);
+          if(t){ u.target = t; u.state = 'fight'; }
+        }
+
+        if(u.state === 'fight' && u.target){
+          const tgt = u.target;                       // Referenz sichern — dealDamage() kann u.target nullen
+          const d = distance(u,tgt);
+          const towardTarget = Math.sign(tgt.x - u.x) || dir(u);
+          if(u.def.role==='melee' || u.def.role==='stealth'){
+            if(d > u.def.range){
+              u.x += towardTarget*u.def.speed*dt;
+            } else {
+              u.atkCooldown -= dt;
+              if(u.atkCooldown<=0){
+                dealDamage(u, tgt, u.def.dmg);
+                u.atkCooldown = u.def.atkTime;
+              }
+            }
+          } else { // Fernkampf
+            if(d <= effRange(u)){
+              u.atkCooldown -= dt;
+              if(u.atkCooldown<=0){
+                dealDamage(u, tgt, u.def.dmg);
+                u.atkCooldown = u.def.atkTime;
+                spawnProjectile(u, tgt);
+              }
+            } else if(u.inside){
+              u.target = null;                        // von der Mauer aus nicht erreichbar
+            } else {
+              u.x += towardTarget*u.def.speed*dt*0.6;
             }
           }
-        } else { // ranged
-          if(d <= u.def.range){
-            u.atkCooldown -= dt;
-            if(u.atkCooldown<=0){
-              dealDamage(u, tgt, u.def.dmg);
-              u.atkCooldown = u.def.atkTime;
-              spawnProjectile(u, tgt); // BUGFIX: nutzt die gesicherte Referenz statt des evtl. genullten u.target
-            }
-          } else {
-            u.x += towardTarget*u.def.speed*dt*0.6;
-          }
+          continue;
         }
-        continue;
       }
 
-      // Kein Ziel -> vormarschieren oder Burg angreifen
-      const castleX = u.side==='player' ? enemyCastleX : playerCastleX;
-      const reachedCastle = u.side==='player' ? u.x >= castleX-16 : u.x <= castleX+16;
-      if(reachedCastle){
-        if(!u.queued){
-          // BUGFIX: Warteschlangen-Position wird nur EINMAL beim ersten Erreichen
-          // der Burg vergeben, nicht bei jedem Wiedereintritt (sonst "springen"
-          // Einheiten nach jedem Scharmützel wieder ein Stück zurück).
-          const aheadCount = units.filter(o=>o!==u && !o.dead && o.queued && o.side===u.side).length;
-          u.queueOffset = Math.min(aheadCount, 6) * 10;
-          u.x = u.side==='player' ? castleX-16-u.queueOffset : castleX+16+u.queueOffset;
-          u.queued = true;
-        }
-        u.state = 'attackCastle';
-        u.atkCooldown -= dt;
-        if(u.atkCooldown<=0){
-          const dmg = u.def.dmg || 8;
-          if(u.side==='player'){ enemyCastleHP = Math.max(0, enemyCastleHP-dmg); }
-          else { playerCastleHP = Math.max(0, playerCastleHP-dmg); }
-          u.atkCooldown = u.def.atkTime || 0.8;
-        }
-        // Die Burg wehrt sich — sonst leben Angreifer ewig und stapeln sich endlos an.
-        const castleCounter = 10 + level*1.2;
-        u.hp -= castleCounter*dt;
-        if(u.hp<=0 && !u.dead){ u.dead = true; }
-      } else {
-        u.x += dir(u)*u.def.speed*dt;
-        u.state='walk';
-      }
+      if(st === 'garrison') garrisonStep(u, dt);
+      else if(st === 'formation') formationStep(u, dt);
+      else attackStep(u, dt);
     }
 
     units = units.filter(u=>!u.dead);
@@ -2792,9 +3419,7 @@ function initWar(area){
     if(enemyCastleHP<=0){ over=true; won=true; finishLevel(true); }
     else if(playerCastleHP<=0){ over=true; won=false; finishLevel(false); }
 
-    // HUD nur gedrosselt aktualisieren (ca. 6x/Sek. statt 60x/Sek.) —
-    // ständige DOM-Schreibzugriffe (Balkenbreite, Button-disabled) pro Frame
-    // waren eine Hauptursache für das Ruckeln.
+    // HUD nur gedrosselt aktualisieren (ca. 6x/Sek.)
     hudTimer += dt;
     if(hudTimer >= 0.15 || over){
       hudTimer = 0;
@@ -2803,6 +3428,8 @@ function initWar(area){
   }
 
   function dealDamage(attacker, target, dmg){
+    // Superkrieger (Ultra Instinkt) weicht manchen Angriffen aus
+    if(target.def.dodge && Math.random() < target.def.dodge){ target.dodgeFx = 0.3; return; }
     target.hp -= dmg;
     if(target.hp<=0 && !target.dead){
       target.dead = true;
@@ -2810,28 +3437,24 @@ function initWar(area){
     }
   }
 
-  // Minenarbeiter-Zustandsmaschine: läuft zur Mine (Gold) oder zum Steinbruch (Stein),
-  // baut ab und bringt die Fuhre zur Burg (100 Gold bzw. 50 Stein).
+  // Minenarbeiter: laufen zur Mine, bauen Gold UND Stein ab und bringen die Fuhre zur Burg
+  // (100 Gold + 50 Stein pro Fuhre). Gegnerische Minenarbeiter füllen die Kasse des Gegners.
   function updateMiner(u, dt){
     const walkSpeed = u.def.speed;
+    const mineX = u.side==='player' ? GOLD_X : WORLD_W - GOLD_X;
+    const baseX = u.side==='player' ? playerCastleX : enemyCastleX;
     if(u.state==='toMine'){
-      if(!u.res) u.res = mineMode;                       // Ziel pro Fuhre festlegen
-      const base = u.res === 'stone' ? QUARRY_X : GOLD_X;
-      const tx = u.side==='player' ? base : WORLD_W - base;
-      const arrived = u.side==='player' ? u.x>=tx : u.x<=tx;
+      const arrived = u.side==='player' ? u.x>=mineX : u.x<=mineX;
       if(arrived) u.state='mining';
       else u.x += dir(u)*walkSpeed*dt;
     } else if(u.state==='mining'){
       u.mineTimer += dt;
-      if(u.mineTimer >= (u.res==='stone' ? 2.2 : 1.6)){ u.mineTimer=0; u.state='toBase'; u.loaded=true; }
+      if(u.mineTimer >= 2.0){ u.mineTimer=0; u.state='toBase'; u.loaded=true; }
     } else if(u.state==='toBase'){
-      const bx = u.side==='player' ? playerCastleX+10 : enemyCastleX-10;
-      const arrived = u.side==='player' ? u.x<=bx : u.x>=bx;
+      const arrived = u.side==='player' ? u.x<=baseX : u.x>=baseX;
       if(arrived){
-        if(u.side==='player'){
-          if(u.res==='stone') stone += STONE_PER_TRIP; else gold += 100;
-        }
-        u.res = null;
+        if(u.side==='player'){ gold += GOLD_PER_TRIP; stone += STONE_PER_TRIP; }
+        else { enemyGold += GOLD_PER_TRIP; enemyStone += STONE_PER_TRIP; }
         u.loaded=false;
         u.state='toMine';
       } else {
@@ -2843,7 +3466,7 @@ function initWar(area){
   // Projektile für Bogenschütze/Magier
   let projectiles = [];
   function spawnProjectile(from, to){
-    projectiles.push({ x:from.x, y:groundY-40, tx:to.x, ty:groundY-40, t:0, key:from.key });
+    projectiles.push({ x:from.x, y:from.inside ? groundY-82 : groundY-40, tx:to.x, ty:groundY-40, t:0, key:from.key });
   }
   function updateProjectiles(dt){
     projectiles.forEach(p=>{ p.t += dt*2.6; });
@@ -2869,24 +3492,13 @@ function initWar(area){
   }
 
   /* ---------------- Rendering ---------------- */
-  function drawCastle(x, side, hpRatio){
-    const dirSign = side==='player' ? 1 : -1;
-    ctx.fillStyle = side==='player' ? '#123a7a' : '#5c1224';
-    ctx.strokeStyle = side==='player' ? '#00f0ff' : '#ff3860';
-    ctx.lineWidth = 2;
-    const w=40,h=70;
-    const bx = side==='player' ? x-6 : x-w+6;
-    ctx.fillRect(bx, groundY-h, w, h);
-    ctx.strokeRect(bx, groundY-h, w, h);
-    for(let i=0;i<4;i++){
-      ctx.fillRect(bx+i*11, groundY-h-8, 8, 8);
-    }
-  }
-  function drawStick(u){
-    const scale = u.def.big ? 1.7 : 1;
-    const x = u.x, baseY = groundY;
+  function drawStick(u, opt){
+    opt = opt || {};
+    const scale = opt.scale || u.def.scale || (u.def.big ? 1.7 : 1);
+    const x = (opt.x != null ? opt.x : u.x) + (opt.dx || 0);
+    const baseY = opt.baseY != null ? opt.baseY : groundY;
     const bodyColor = u.side==='player' ? '#00f0ff' : '#ff3860';
-    const alpha = u.stealth ? 0.3 : 1;
+    const alpha = (u.stealth ? 0.3 : 1) * (opt.alphaMul || 1);
     ctx.globalAlpha = alpha;
     ctx.lineCap = 'round';
     const headY = baseY - 34*scale;
@@ -2900,17 +3512,36 @@ function initWar(area){
       archer:    { body:'#6fbf6f', accent:'#3f7a3f' },
       berserker: { body:'#ff9d4d', accent:'#a8461a' },
       mage:      { body:'#b98bff', accent:'#6a2fbf' },
-      ninja:     { body:'#2b2b38', accent:'#0d0d14' }
+      ninja:     { body:'#2b2b38', accent:'#0d0d14' },
+      super:     { body:'#ff8a1f', accent:'#14141c' }
     };
     const skin = skins[u.key] || {body:bodyColor, accent:bodyColor};
 
+    /* ---- Superkrieger (Son Goku): leichtes Leuchten in der Teamfarbe ---- */
+    if(u.key==='super' && !opt.ghost){
+      const pulse = 0.5 + 0.5*Math.sin(u.anim*6);
+      ctx.save();
+      ctx.fillStyle = bodyColor;
+      ctx.globalAlpha = (0.10 + 0.07*pulse) * alpha;
+      ctx.beginPath(); ctx.ellipse(x, baseY-22*scale, 17*scale, 30*scale, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
     /* ---- Beine ---- */
-    ctx.strokeStyle = bodyColor;
-    ctx.lineWidth = 3*scale;
+    ctx.strokeStyle = u.key==='super' ? '#ff8a1f' : bodyColor;
+    ctx.lineWidth = (u.key==='super' ? 4.6 : 3)*scale;
     ctx.beginPath();
     ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x-6*scale, baseY);
     ctx.moveTo(x, baseY-12*scale); ctx.lineTo(x+6*scale, baseY);
     ctx.stroke();
+    if(u.key==='super'){                                   // dunkelblaue Stiefel
+      ctx.fillStyle = '#1f2a6b';
+      ctx.fillRect(x-6*scale-3.5*scale, baseY-4*scale, 7*scale, 4.5*scale);
+      ctx.fillRect(x+6*scale-3.5*scale, baseY-4*scale, 7*scale, 4.5*scale);
+      ctx.fillStyle = '#e0a42a';
+      ctx.fillRect(x-6*scale-3.5*scale, baseY-4*scale, 7*scale, 1.2*scale);
+      ctx.fillRect(x+6*scale-3.5*scale, baseY-4*scale, 7*scale, 1.2*scale);
+    }
 
     /* ---- Robe für Magier statt Beinen (Überzeichnung) ---- */
     if(u.key==='mage'){
@@ -2926,24 +3557,33 @@ function initWar(area){
 
     /* ---- Körper ---- */
     ctx.strokeStyle = skin.body;
-    ctx.lineWidth = 4*scale;
+    ctx.lineWidth = (u.key==='super' ? 6.5 : 4)*scale;
     ctx.beginPath();
     ctx.moveTo(x, headY+6*scale); ctx.lineTo(x, baseY-12*scale);
     ctx.stroke();
 
     /* ---- Arme ---- */
-    ctx.strokeStyle = bodyColor;
-    ctx.lineWidth = 3*scale;
+    ctx.strokeStyle = u.key==='super' ? '#f2c9a0' : bodyColor;
+    ctx.lineWidth = (u.key==='super' ? 3.6 : 3)*scale;
     ctx.beginPath();
     ctx.moveTo(x, headY+12*scale); ctx.lineTo(x+fdir*10*scale, headY+18*scale+swing);
     ctx.moveTo(x, headY+12*scale); ctx.lineTo(x-fdir*6*scale, headY+18*scale);
     ctx.stroke();
+    if(u.key==='super'){                                   // kurze orange Ärmel
+      ctx.strokeStyle = '#ff8a1f';
+      ctx.lineWidth = 4.4*scale;
+      ctx.beginPath();
+      ctx.moveTo(x, headY+12*scale); ctx.lineTo(x+fdir*4*scale, headY+14.4*scale+swing*0.4);
+      ctx.moveTo(x, headY+12*scale); ctx.lineTo(x-fdir*2.4*scale, headY+14.4*scale);
+      ctx.stroke();
+    }
 
     /* ---- Kopf + Klassen-Kopfschmuck ---- */
     ctx.strokeStyle = bodyColor;
     ctx.lineWidth = 3*scale;
     ctx.beginPath();
     ctx.arc(x, headY, 6*scale, 0, Math.PI*2);
+    if(u.key==='super'){ ctx.fillStyle = '#f2c9a0'; ctx.fill(); }
     ctx.stroke();
     ctx.fillStyle = skin.accent;
     if(u.key==='miner'){
@@ -2959,6 +3599,22 @@ function initWar(area){
       ctx.beginPath(); ctx.moveTo(x-8*scale,headY-3*scale); ctx.lineTo(x,headY-18*scale); ctx.lineTo(x+8*scale,headY-3*scale); ctx.fill(); // Spitzhut
     } else if(u.key==='ninja'){
       ctx.fillRect(x-7*scale, headY-3*scale, 14*scale, 5*scale); // Stirnband über Augen
+    } else if(u.key==='super'){
+      // schwarze, nach oben stehende Goku-Stacheln
+      ctx.fillStyle = '#14141c';
+      ctx.beginPath();
+      ctx.moveTo(x-6*scale, headY-1*scale);
+      ctx.lineTo(x-11*scale, headY-9*scale); ctx.lineTo(x-5*scale, headY-8*scale);
+      ctx.lineTo(x-8*scale, headY-17*scale); ctx.lineTo(x-2*scale, headY-11*scale);
+      ctx.lineTo(x-1*scale, headY-20*scale); ctx.lineTo(x+3*scale, headY-11*scale);
+      ctx.lineTo(x+7*scale, headY-18*scale); ctx.lineTo(x+7*scale, headY-9*scale);
+      ctx.lineTo(x+12*scale, headY-11*scale); ctx.lineTo(x+6*scale, headY-1*scale);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#3a3a4d'; ctx.lineWidth = Math.max(0.8, 0.8*scale); ctx.stroke();
+      // Augen
+      ctx.fillStyle = '#14141c';
+      ctx.fillRect(x+fdir*1*scale, headY-1*scale, 1.8*scale, 1.8*scale);
+      ctx.fillRect(x+fdir*4*scale, headY-1*scale, 1.8*scale, 1.8*scale);
     }
 
     /* ---- Waffen (echte Vektor-Skins statt Emoji) ---- */
@@ -2969,6 +3625,13 @@ function initWar(area){
       ctx.beginPath(); ctx.moveTo(handX-4*scale, handY-6*scale); ctx.lineTo(handX+6*scale, handY+6*scale); ctx.stroke();
       ctx.strokeStyle = '#5c3a1e'; ctx.lineWidth = 1.5*scale;
       ctx.beginPath(); ctx.moveTo(handX-6*scale, handY-8*scale); ctx.lineTo(handX+2*scale, handY); ctx.stroke();
+      if(u.loaded){                                    // Schubkarre mit Gold und Stein
+        const bx = x - fdir*16*scale, by = baseY;
+        ctx.fillStyle = '#7a5228'; ctx.fillRect(bx-7, by-12, 14, 8);
+        ctx.fillStyle = 'rgba(255,200,60,0.95)'; ctx.fillRect(bx-5, by-15, 6, 4);
+        ctx.fillStyle = '#8d93a8'; ctx.fillRect(bx+1, by-15, 5, 4);
+        ctx.fillStyle = '#1b1b24'; ctx.beginPath(); ctx.arc(bx+fdir*8, by-3, 3, 0, Math.PI*2); ctx.fill();
+      }
     } else if(u.key==='sword'){
       ctx.strokeStyle = '#e8eef5';
       ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX+fdir*14*scale, handY-14*scale); ctx.stroke();
@@ -2997,15 +3660,29 @@ function initWar(area){
       ctx.strokeStyle = '#cfd6e0'; ctx.lineWidth=2*scale;
       ctx.beginPath(); ctx.moveTo(handX-3*scale,handY); ctx.lineTo(handX+fdir*8*scale, handY-8*scale); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(handX-3*scale,handY+4*scale); ctx.lineTo(handX-fdir*7*scale, handY-4*scale); ctx.stroke();
+    } else if(u.key==='super'){
+      ctx.fillStyle = '#2a5bd7';
+      ctx.fillRect(x-5.5*scale, baseY-18*scale, 11*scale, 3.6*scale);                   // blauer Gürtel (Obi)
+      ctx.beginPath(); ctx.arc(handX, handY, 3.2*scale, 0, Math.PI*2); ctx.fill();        // blaues Armband
+      ctx.beginPath(); ctx.arc(x-fdir*6*scale, headY+18*scale, 2.8*scale, 0, Math.PI*2); ctx.fill();   // Armband hinten
+      ctx.fillStyle = '#f2c9a0';
+      ctx.beginPath(); ctx.arc(handX+fdir*2.5*scale, handY-1*scale, 2.5*scale, 0, Math.PI*2); ctx.fill();   // Faust
     }
 
     ctx.globalAlpha = 1;
-    /* ---- HP-Leiste ---- */
-    const barW = 22*scale;
-    ctx.fillStyle='#03010a';
-    ctx.fillRect(x-barW/2, headY-24*scale, barW, 4);
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(x-barW/2, headY-24*scale, barW*Math.max(0,u.hp/u.maxHp), 4);
+    if(!opt.noBar){
+      /* ---- HP-Leiste ---- */
+      const barW = 22*scale;
+      ctx.fillStyle='#03010a';
+      ctx.fillRect(x-barW/2, headY-24*scale, barW, 4);
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(x-barW/2, headY-24*scale, barW*Math.max(0,u.hp/u.maxHp), 4);
+    }
+    /* ---- Ausweichen: Nachbilder (Ultra Instinkt) ---- */
+    if(u.dodgeFx > 0 && !opt.ghost){
+      drawStick(u, { dx:-16, alphaMul:0.35, ghost:true, noBar:true });
+      drawStick(u, { dx: 16, alphaMul:0.35, ghost:true, noBar:true });
+    }
   }
   /* ---------------- Level-Karte ---------------- */
   const MAP_NODES = [[10,78],[26,64],[44,76],[62,62],[80,72],[86,44],[68,32],[48,42],[28,28],[50,12]];
@@ -3080,13 +3757,12 @@ function initWar(area){
     mctx.lineWidth = 1;
     mctx.beginPath(); mctx.moveTo(0, gy+0.5); mctx.lineTo(mw, gy+0.5); mctx.stroke();
     // Burgen
-    mctx.fillStyle = '#00f0ff'; mctx.fillRect(playerCastleX*k - 5, gy - 16, 10, 16);
-    mctx.fillStyle = '#ff3860'; mctx.fillRect(enemyCastleX*k - 5, gy - 16, 10, 16);
+    mctx.fillStyle = '#00f0ff'; mctx.fillRect(playerCastleX*k - 7, gy - 18, 14, 18);
+    mctx.fillStyle = '#ff3860'; mctx.fillRect(enemyCastleX*k - 7, gy - 18, 14, 18);
     // Minen / Steinbruch / Bauplätze
     mctx.fillStyle = '#ffc23a'; mctx.fillRect(GOLD_X*k - 3, gy - 6, 6, 6);
     mctx.fillStyle = '#ffc23a'; mctx.fillRect((WORLD_W-GOLD_X)*k - 3, gy - 6, 6, 6);
     if(level >= TOWER_FROM_LEVEL){
-      mctx.fillStyle = '#8d93a8'; mctx.fillRect(QUARRY_X*k - 3, gy - 6, 6, 6);
       mctx.strokeStyle = 'rgba(0,240,255,0.4)';
       TOWER_SLOTS.forEach(x=>{ mctx.strokeRect(x*k - 2.5, gy - 11.5, 5, 11); });
     }
@@ -3159,31 +3835,54 @@ function initWar(area){
   document.addEventListener('keydown', onWarKeyDown);
   document.addEventListener('keyup', onWarKeyUp);
 
-  /* ---------------- Wachtürme ---------------- */
+  /* ---------------- Türme (Bogen / Magier / Ninja) ---------------- */
   function towerAt(slot){ return units.find(u=>u.def.role==='tower' && u.slot===slot && !u.dead); }
-  function buildTower(){
+  function buildTower(type){
     if(over || level < TOWER_FROM_LEVEL) return;
+    const T = TOWER_TYPES[type];
     const msg = document.getElementById('warMsg');
-    if(stone < TOWER_COST){ msg.textContent = `Dafür brauchst du ${TOWER_COST} Stein — stelle den Abbau auf Stein um.`; return; }
+    if(stone < T.cost){ msg.textContent = `Für den ${T.name} brauchst du ${T.cost} Stein.`; return; }
     const slot = TOWER_SLOTS.findIndex((_,i)=>!towerAt(i));
     if(slot < 0){ msg.textContent = 'Alle Bauplätze sind schon belegt.'; return; }
-    stone -= TOWER_COST;
+    stone -= T.cost;
     units.push({
-      side:'player', key:'tower', def:TOWER_DEF, slot,
-      x:TOWER_SLOTS[slot], y:groundY, hp:TOWER_DEF.hp, maxHp:TOWER_DEF.hp,
-      target:null, atkCooldown:0, state:'idle', stealth:false, dead:false, anim:0
+      side:'player', key:T.key, def:T, slot,
+      x:TOWER_SLOTS[slot], y:groundY, hp:T.hp, maxHp:T.hp,
+      target:null, atkCooldown:0, spawnTimer:T.spawnEvery || 0,
+      state:'idle', stealth:false, inside:false, dead:false, anim:0
     });
-    msg.textContent = 'Wachturm gebaut! Er beschießt Gegner in seiner Reichweite.';
+    msg.textContent = type === 'ninja'
+      ? 'Ninjaturm gebaut! Er schickt alle 20 Sekunden einen Ninja los.'
+      : `${T.name} gebaut! Er beschießt Gegner in seiner Reichweite.`;
     updateHUD();
   }
   function updateTower(u, dt){
+    const D = u.def;
+    if(D.kind === 'ninja'){
+      u.spawnTimer -= dt;
+      if(u.spawnTimer <= 0){
+        u.spawnTimer = D.spawnEvery;
+        const alive = units.filter(o=>o.side==='player' && o.key==='ninja' && o.fromTower && !o.dead).length;
+        if(alive < MAX_TOWER_NINJAS){
+          const n = makeUnit('player', 'ninja');
+          n.x = u.x; n.fromTower = true;
+          units.push(n);
+        }
+      }
+      return;
+    }
     u.atkCooldown -= dt;
     if(u.atkCooldown > 0) return;
     const t = findTarget(u);
     if(t){
-      dealDamage(u, t, u.def.dmg);
+      dealDamage(u, t, D.dmg);
+      if(D.splash){                                  // Feuerball trifft auch Gegner in der Nähe
+        for(const o of units){
+          if(o!==t && !o.dead && o.side!==u.side && !o.stealth && !o.inside && Math.abs(o.x - t.x) <= D.splash) dealDamage(u, o, D.dmg*0.5);
+        }
+      }
       spawnProjectile(u, t);
-      u.atkCooldown = u.def.atkTime;
+      u.atkCooldown = D.atkTime;
     } else {
       u.atkCooldown = 0.2;
     }
@@ -3192,49 +3891,154 @@ function initWar(area){
   /* ---------------- Zeichnen (Welt mit Kamera) ---------------- */
   function drawMine(x){
     ctx.fillStyle = '#3a2a52';
-    ctx.beginPath(); ctx.moveTo(x-16, groundY); ctx.lineTo(x, groundY-24); ctx.lineTo(x+16, groundY); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(255,200,60,0.9)';
-    ctx.fillRect(x-4, groundY-14, 5, 4);
-    ctx.fillRect(x+3, groundY-8, 4, 3);
+    ctx.beginPath(); ctx.moveTo(x-18, groundY); ctx.lineTo(x, groundY-26); ctx.lineTo(x+18, groundY); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#585d6d';                       // Stein
+    ctx.fillRect(x-17, groundY-7, 8, 7); ctx.fillRect(x+9, groundY-10, 9, 10);
+    ctx.fillStyle = 'rgba(255,200,60,0.95)';         // Gold
+    ctx.fillRect(x-4, groundY-15, 5, 4); ctx.fillRect(x+2, groundY-8, 4, 3);
   }
-  function drawQuarry(x){
-    ctx.fillStyle = '#585d6d';
-    ctx.beginPath();
-    ctx.moveTo(x-24, groundY); ctx.lineTo(x-14, groundY-18); ctx.lineTo(x-2, groundY-12);
-    ctx.lineTo(x+10, groundY-26); ctx.lineTo(x+26, groundY); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#7d8294';
-    ctx.fillRect(x-10, groundY-9, 9, 9);
-    ctx.fillRect(x+4, groundY-7, 7, 7);
-  }
-  function drawTower(u){
-    const x = u.x, w = 24, h = 62, top = groundY - h;
-    ctx.fillStyle = '#6f7788';
-    ctx.fillRect(x-w/2, top, w, h);
-    ctx.strokeStyle = 'rgba(20,22,30,0.55)';
+  function bricks(x0, y0, w, h){
+    ctx.strokeStyle = 'rgba(15,12,30,0.45)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for(let yy=top+10; yy<groundY; yy+=10){ ctx.moveTo(x-w/2, yy); ctx.lineTo(x+w/2, yy); }
-    for(let r=0, yy=top; yy<groundY; yy+=10, r++){
-      const off = r%2 ? 6 : 15;
-      ctx.moveTo(x-w/2+off, yy); ctx.lineTo(x-w/2+off, yy+10);
+    for(let yy=y0+10; yy<y0+h; yy+=10){ ctx.moveTo(x0, yy); ctx.lineTo(x0+w, yy); }
+    for(let r=0, yy=y0; yy<y0+h; yy+=10, r++){
+      for(let xx=x0+(r%2 ? 7 : 14); xx<x0+w; xx+=14){ ctx.moveTo(xx, yy); ctx.lineTo(xx, Math.min(yy+10, y0+h)); }
     }
     ctx.stroke();
-    ctx.fillStyle = '#808a9d';
-    for(let i=0;i<3;i++) ctx.fillRect(x-w/2-1+i*9, top-7, 7, 7);
-    ctx.fillStyle = '#0b0a14';
-    ctx.fillRect(x-2, top+16, 4, 12);
-    ctx.strokeStyle = '#00f0ff';
+  }
+  function drawCastle(x, side, ratio, garrisonCount){
+    const ply = side === 'player';
+    const stoneC = ply ? '#56658a' : '#7a4558';
+    const darkC  = ply ? '#3b4766' : '#56303f';
+    const neon   = ply ? '#00f0ff' : '#ff3860';
+    const wallH = 62, towerH = 102, keepH = 132;
+    const fl = ply ? 1 : -1;                         // Flaggen wehen nach außen
+
+    // Bergfried (Hauptturm), Mauer, Seitentürme
+    ctx.fillStyle = darkC;  ctx.fillRect(x-18, groundY-keepH, 36, keepH);
+    bricks(x-18, groundY-keepH, 36, keepH);
+    ctx.fillStyle = stoneC; ctx.fillRect(x-48, groundY-wallH, 96, wallH);
+    bricks(x-48, groundY-wallH, 96, wallH);
+    [-56, 28].forEach(ox=>{
+      ctx.fillStyle = stoneC; ctx.fillRect(x+ox, groundY-towerH, 28, towerH);
+      bricks(x+ox, groundY-towerH, 28, towerH);
+      // spitzes Dach
+      ctx.fillStyle = darkC;
+      ctx.beginPath(); ctx.moveTo(x+ox-4, groundY-towerH); ctx.lineTo(x+ox+14, groundY-towerH-28); ctx.lineTo(x+ox+32, groundY-towerH); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = neon; ctx.lineWidth = 1.5; ctx.stroke();
+      // Schießscharte
+      ctx.fillStyle = '#0b0814'; ctx.fillRect(x+ox+12, groundY-towerH+22, 4, 14);
+    });
+    // Zinnen: Mauer und Bergfried
+    ctx.fillStyle = stoneC;
+    for(let i=0;i<5;i++) ctx.fillRect(x-26+i*13, groundY-wallH-8, 8, 8);
+    ctx.fillStyle = darkC;
+    for(let i=0;i<4;i++) ctx.fillRect(x-18+i*10.5, groundY-keepH-8, 7, 8);
+    // Fenster am Bergfried
+    ctx.fillStyle = '#0b0814';
+    ctx.fillRect(x-9, groundY-keepH+22, 4, 12); ctx.fillRect(x+5, groundY-keepH+22, 4, 12);
+    ctx.fillStyle = ply ? 'rgba(0,240,255,0.55)' : 'rgba(255,56,96,0.55)';
+    ctx.fillRect(x-8, groundY-keepH+26, 2, 6); ctx.fillRect(x+6, groundY-keepH+26, 2, 6);
+    // Neon-Kontur
+    ctx.strokeStyle = neon; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.85;
+    ctx.strokeRect(x-18, groundY-keepH, 36, keepH);
+    ctx.strokeRect(x-48, groundY-wallH, 96, wallH);
+    ctx.strokeRect(x-56, groundY-towerH, 28, towerH);
+    ctx.strokeRect(x+28, groundY-towerH, 28, towerH);
+    ctx.globalAlpha = 1;
+    // Tor
+    ctx.fillStyle = '#0b0814';
+    ctx.beginPath(); ctx.moveTo(x-12, groundY); ctx.lineTo(x-12, groundY-24); ctx.arc(x, groundY-24, 12, Math.PI, 0); ctx.lineTo(x+12, groundY); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(150,160,190,0.55)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let gx=-8; gx<=8; gx+=5){ ctx.moveTo(x+gx, groundY); ctx.lineTo(x+gx, groundY-30+Math.abs(gx)*0.9); }
+    ctx.moveTo(x-12, groundY-14); ctx.lineTo(x+12, groundY-14);
+    ctx.stroke();
+    ctx.strokeStyle = neon; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x-12, groundY); ctx.lineTo(x-12, groundY-24); ctx.arc(x, groundY-24, 12, Math.PI, 0); ctx.lineTo(x+12, groundY); ctx.stroke();
+    // Fahnen
+    ctx.strokeStyle = '#c5cce0'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, groundY-keepH-8); ctx.lineTo(x, groundY-keepH-30); ctx.stroke();
+    ctx.fillStyle = neon;
+    ctx.beginPath(); ctx.moveTo(x, groundY-keepH-30); ctx.lineTo(x+fl*18, groundY-keepH-25); ctx.lineTo(x, groundY-keepH-19); ctx.closePath(); ctx.fill();
+    // Schaden: Risse und Flammen
+    if(ratio < 0.66){
+      ctx.strokeStyle = 'rgba(10,8,20,0.8)'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x-30, groundY-wallH); ctx.lineTo(x-26, groundY-wallH+14); ctx.lineTo(x-32, groundY-wallH+26);
+      ctx.moveTo(x+36, groundY-towerH+30); ctx.lineTo(x+41, groundY-towerH+46); ctx.lineTo(x+35, groundY-towerH+60);
+      ctx.moveTo(x+8, groundY-keepH+50); ctx.lineTo(x+12, groundY-keepH+66);
+      ctx.stroke();
+    }
+    if(ratio < 0.33){
+      const t = performance.now()/120;
+      ctx.fillStyle = 'rgba(255,140,40,0.9)';
+      [[x-42, groundY-towerH-6],[x+10, groundY-keepH-4]].forEach(([fx,fy],i)=>{
+        const h = 10 + 5*Math.sin(t + i*2);
+        ctx.beginPath(); ctx.moveTo(fx-5, fy); ctx.lineTo(fx, fy-h); ctx.lineTo(fx+5, fy); ctx.closePath(); ctx.fill();
+      });
+      ctx.fillStyle = 'rgba(255,220,100,0.9)';
+      ctx.beginPath(); ctx.moveTo(x+36, groundY-wallH-2); ctx.lineTo(x+40, groundY-wallH-12); ctx.lineTo(x+44, groundY-wallH-2); ctx.closePath(); ctx.fill();
+    }
+    // Anzahl der Truppen in der Burg
+    if(garrisonCount > 0){
+      ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#dff6ff';
+      ctx.fillText('🛡 ' + garrisonCount, x, groundY-keepH-36);
+    }
+  }
+  function drawTower(u){
+    const kind = u.def.kind;
+    const x = u.x, w = 24, h = kind === 'mage' ? 76 : 62, top = groundY - h;
+    const body = kind === 'archer' ? '#6f7788' : (kind === 'mage' ? '#5d5a82' : '#2e2a3d');
+    ctx.fillStyle = body;
+    ctx.fillRect(x-w/2, top, w, h);
+    bricks(x-w/2, top, w, h);
+    if(kind === 'archer'){
+      ctx.fillStyle = '#808a9d';
+      for(let i=0;i<3;i++) ctx.fillRect(x-w/2-1+i*9, top-7, 7, 7);
+      ctx.fillStyle = '#0b0814'; ctx.fillRect(x-2, top+16, 4, 12);
+      ctx.strokeStyle = '#c5cce0'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x, top-7); ctx.lineTo(x, top-22); ctx.stroke();
+      ctx.fillStyle = '#00f0ff';
+      ctx.beginPath(); ctx.moveTo(x, top-22); ctx.lineTo(x+10, top-18); ctx.lineTo(x, top-14); ctx.closePath(); ctx.fill();
+    } else if(kind === 'mage'){
+      ctx.fillStyle = '#7a76a8';
+      for(let i=0;i<3;i++) ctx.fillRect(x-w/2-1+i*9, top-7, 7, 7);
+      ctx.fillStyle = 'rgba(255,140,40,0.9)'; ctx.fillRect(x-2, top+18, 4, 12);      // glühendes Fenster
+      const pulse = 0.5 + 0.5*Math.sin(u.anim*4);
+      ctx.fillStyle = `rgba(255,140,40,${0.3+0.25*pulse})`;
+      ctx.beginPath(); ctx.arc(x, top-16, 10, 0, Math.PI*2); ctx.fill();                // Magie-Kugel
+      ctx.fillStyle = 'rgba(255,200,100,0.95)';
+      ctx.beginPath(); ctx.arc(x, top-16, 5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#7a76a8'; ctx.fillRect(x-4, top-12, 8, 6);
+    } else {
+      // Ninjaturm: dunkle Pagode mit zwei Dächern
+      ctx.fillStyle = '#14101f';
+      ctx.beginPath(); ctx.moveTo(x-22, top+8); ctx.lineTo(x, top-14); ctx.lineTo(x+22, top+8); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-19, top+36); ctx.lineTo(x, top+20); ctx.lineTo(x+19, top+36); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x-22, top+8); ctx.lineTo(x, top-14); ctx.lineTo(x+22, top+8); ctx.stroke();
+      ctx.fillStyle = '#8b5cf6';                                                       // Shuriken-Zeichen
+      ctx.beginPath();
+      for(let i=0;i<8;i++){
+        const rad = i%2 ? 2.2 : 6, a = -Math.PI/2 + i*Math.PI/4;
+        ctx.lineTo(x + Math.cos(a)*rad, top+27 + Math.sin(a)*rad);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.strokeStyle = kind === 'ninja' ? '#8b5cf6' : '#00f0ff';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x-w/2, top, w, h);
-    // Fahne
-    ctx.strokeStyle = '#c5cce0'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(x, top-7); ctx.lineTo(x, top-22); ctx.stroke();
-    ctx.fillStyle = '#00f0ff';
-    ctx.beginPath(); ctx.moveTo(x, top-22); ctx.lineTo(x+10, top-18); ctx.lineTo(x, top-14); ctx.closePath(); ctx.fill();
     // Lebensleiste
-    const bw = 30;
-    ctx.fillStyle = '#03010a'; ctx.fillRect(x-bw/2, top-30, bw, 4);
-    ctx.fillStyle = '#00f0ff'; ctx.fillRect(x-bw/2, top-30, bw*Math.max(0, u.hp/u.maxHp), 4);
+    const bw = 30, by = top - (kind === 'ninja' ? 22 : 32);
+    ctx.fillStyle = '#03010a'; ctx.fillRect(x-bw/2, by, bw, 4);
+    ctx.fillStyle = '#00f0ff'; ctx.fillRect(x-bw/2, by, bw*Math.max(0, u.hp/u.maxHp), 4);
+    if(kind === 'ninja'){                                   // Fortschritt bis zum nächsten Ninja
+      ctx.fillStyle = '#03010a'; ctx.fillRect(x-bw/2, by+6, bw, 3);
+      ctx.fillStyle = '#8b5cf6'; ctx.fillRect(x-bw/2, by+6, bw*(1 - u.spawnTimer/u.def.spawnEvery), 3);
+    }
   }
   function draw(){
     const cx = Math.round(cam);
@@ -3245,19 +4049,24 @@ function initWar(area){
     drawMine(GOLD_X);
     drawMine(WORLD_W - GOLD_X);
     if(level >= TOWER_FROM_LEVEL){
-      drawQuarry(QUARRY_X);
       ctx.setLineDash([4,4]);
       ctx.strokeStyle = 'rgba(0,240,255,0.35)';
       ctx.lineWidth = 1;
       TOWER_SLOTS.forEach((x,i)=>{ if(!towerAt(i)) ctx.strokeRect(x-12, groundY-62, 24, 62); });
       ctx.setLineDash([]);
     }
-    drawCastle(playerCastleX, 'player');
-    drawCastle(enemyCastleX, 'enemy');
+    const garrisoned = units.filter(u=>u.side==='player' && u.inside).length;
+    drawCastle(playerCastleX, 'player', playerCastleHP/playerCastleMax, garrisoned);
+    drawCastle(enemyCastleX, 'enemy', enemyCastleHP/enemyCastleMax, 0);
 
     for(const u of units){
       if(u.x < cx-90 || u.x > cx+W+90) continue;
-      if(u.def.role === 'tower') drawTower(u); else drawStick(u);
+      if(u.def.role === 'tower') drawTower(u);
+      else if(u.inside){
+        // Fernkämpfer stehen oben auf der Mauer, Nahkämpfer warten unsichtbar in der Burg
+        if(u.def.role === 'ranged') drawStick(u, { scale:0.62, baseY:groundY-64 });
+      }
+      else drawStick(u);
     }
     projectiles.forEach(p=>{
       const x = p.x + (p.tx-p.x)*p.t;
